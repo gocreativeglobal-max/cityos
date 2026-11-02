@@ -284,53 +284,8 @@ export default function CityMarket() {
         defaultAddress={defaultAddress}
       />
 
-      {/* WhatsApp Checkout Note */}
-      <div className="bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-3 px-4 flex items-center justify-between gap-3 text-xs shadow-xs">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-6 h-6 rounded-full bg-[#25D366] text-white flex items-center justify-center shrink-0 shadow-xs">
-            <MessageSquare className="w-3.5 h-3.5" />
-          </div>
-          <p className="text-emerald-950 text-xs font-semibold truncate">
-            <strong className="font-extrabold text-emerald-900">Direct WhatsApp Orders:</strong> Every checkout routes to WhatsApp via <span className="font-extrabold text-emerald-800">+2348065373747</span>
-          </p>
-        </div>
-        <span className="shrink-0 text-[10px] uppercase tracking-wider font-extrabold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
-          Instant Dispatch
-        </span>
-      </div>
-
-      {/* 2. Shop Sectors & Product Categories */}
+      {/* Product Categories */}
       <section className="space-y-3">
-        {/* Shop Sectors Bar */}
-        {storeSectors.length > 1 && (
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1 no-scrollbar">
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-slate-400 uppercase tracking-wider pr-1 shrink-0">
-              <Building2 className="w-3.5 h-3.5" /> Shop Sector:
-            </span>
-            {storeSectors.map((sector) => {
-              const isActive = activeSector === sector.id;
-              return (
-                <button
-                  key={sector.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveSector(sector.id);
-                    setActiveAisle('all');
-                  }}
-                  className={cn(
-                    'px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shrink-0 border flex items-center gap-1.5',
-                    isActive
-                      ? 'bg-emerald-700 text-white border-emerald-700 shadow-2xs'
-                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
-                  )}
-                >
-                  <span>{sector.label}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
-
         {/* Product Categories / Aisles */}
         {categories.length > 1 && (
           <div className="space-y-2">
