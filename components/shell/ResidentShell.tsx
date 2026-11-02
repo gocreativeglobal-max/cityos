@@ -706,11 +706,6 @@ export default function ResidentShell({
               <header className="hidden md:flex h-16 items-center justify-between px-6 lg:px-8 bg-white border-b border-slate-100 sticky top-0 z-20">
                 <div className="flex items-center gap-3">
                   <h2 className="text-xs font-black text-ink uppercase tracking-[0.18em]">{getTitle()}</h2>
-                  <span className="text-[10px] text-slate-300 font-bold">/</span>
-                  <span className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                    <span className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
-                    System Online
-                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CartBell />
