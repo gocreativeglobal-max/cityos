@@ -22,6 +22,7 @@ import ChowdeckStoreCard, { StoreCardData } from '@/components/cityos/delivery/C
 import GlovoProductCard, { GlovoProductItem } from '@/components/cityos/delivery/GlovoProductCard';
 import ChowdeckBasketDock from '@/components/cityos/delivery/ChowdeckBasketDock';
 import MarketHeroSlider from '@/components/cityos/MarketHeroSlider';
+import MarketEssentialsDeals from '@/components/cityos/MarketEssentialsDeals';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
 import { CANONICAL_ECOMMERCE_CATEGORIES } from '@/lib/taxonomy/retail-categorizer';
@@ -289,6 +290,14 @@ export default function CityMarket() {
       {!searchQuery.trim() && (
         <MarketHeroSlider
           onSelectCategory={(catId) => handleSelectAisle(catId)}
+        />
+      )}
+
+      {/* 3. All Your Essentials in One Place - Deals Made For You */}
+      {!searchQuery.trim() && (
+        <MarketEssentialsDeals
+          onSelectCategory={(catId) => handleSelectAisle(catId)}
+          onSearchKeyword={(kw) => setSearchQuery(kw)}
         />
       )}
 
