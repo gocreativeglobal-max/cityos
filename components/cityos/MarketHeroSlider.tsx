@@ -28,6 +28,12 @@ export const DEFAULT_BANNER_SLIDES: BannerSlide[] = [
     alt: '9jaLive - Everything You Need. All in One Place. From fashion to groceries, electronics to home essentials.',
     targetSectionId: 'market-catalog-section',
   },
+  {
+    id: 'hero-same-day-delivery',
+    image: '/images/banners/hero-banner-2.jpg',
+    alt: '9jaLive - Get It Today. Not Tomorrow. Shop from local stores and get your orders delivered the very same day.',
+    targetSectionId: 'market-catalog-section',
+  },
 ];
 
 export interface MarketHeroSliderProps {
@@ -126,8 +132,8 @@ export default function MarketHeroSlider({
       role="region"
       aria-label="Promotional Banners"
     >
-      {/* Aspect Ratio Container (1024x409 -> 2.5:1) */}
-      <div className="relative w-full aspect-[2.5/1] min-h-[140px] sm:min-h-[190px] md:min-h-[240px]">
+      {/* Aspect Ratio Container */}
+      <div className="relative w-full aspect-[2.1/1] sm:aspect-[2.35/1] md:aspect-[2.5/1] min-h-[140px] sm:min-h-[190px] md:min-h-[240px]">
         {slides.map((slide, idx) => {
           const isActive = idx === currentIndex;
           return (
