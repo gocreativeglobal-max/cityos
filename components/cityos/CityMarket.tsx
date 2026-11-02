@@ -21,6 +21,7 @@ import ChowdeckCategoryBubbles, { CategoryBubbleItem } from '@/components/cityos
 import ChowdeckStoreCard, { StoreCardData } from '@/components/cityos/delivery/ChowdeckStoreCard';
 import GlovoProductCard, { GlovoProductItem } from '@/components/cityos/delivery/GlovoProductCard';
 import ChowdeckBasketDock from '@/components/cityos/delivery/ChowdeckBasketDock';
+import MarketHeroSlider from '@/components/cityos/MarketHeroSlider';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
 import { CANONICAL_ECOMMERCE_CATEGORIES } from '@/lib/taxonomy/retail-categorizer';
@@ -283,6 +284,13 @@ export default function CityMarket() {
         deliveryHubs={deliveryHubs}
         defaultAddress={defaultAddress}
       />
+
+      {/* 2. Promotional Banner Slider */}
+      {!searchQuery.trim() && (
+        <MarketHeroSlider
+          onSelectCategory={(catId) => handleSelectAisle(catId)}
+        />
+      )}
 
       {/* Product Categories */}
       <section className="space-y-3">
