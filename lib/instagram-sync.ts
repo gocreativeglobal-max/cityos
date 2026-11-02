@@ -65,8 +65,42 @@ export interface CleanedInstagramPost {
 }
 
 /**
- * Cleans raw Instagram captions by stripping hashtag blocks, "link in bio" boilerplate,
- * extracting Naira prices if present, and inferring the best 9jaLive feed category.
+ * Parses an Instagram `og:title` or `og:description` meta string into the real caption and author handle.
+ * Examples:
+ * - og:title: `Channel View Hotel on Instagram: "POV: You just checked into..."`
+ * - og:description: `13 likes, 1 comments - channelviewhotel on October 27, 2026: "POV: You just checked into...". `
+ */
+export function parseInstagramMetaCaption(
+  ogTitle?: string | null,
+  ogDescription?: string | null
+): { caption: string | null; authorHandle: string | null } {
+  let authorHandle: string | null = null;
+  let caption: string | null = null;
+
+  if (ogDescription && typeof ogDescription === 'string') {
+    const descMatch = ogDescription.match(
+      /(?:^|-\s+)([A-Za-z0-9._]+)\s+on\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}:\s*"([\s\S]*)"\.?\s*$/
+    );
+    if (descMatch) {
+      authorHandle = descMatch[1].trim();
+      caption = descMatch[2].trim();
+    }
+  }
+
+  if (!caption && ogTitle && typeof ogTitle === 'string') {
+    const titleMatch = ogTitle.match(/on Instagram:\s*"([\s\S]*)"\s*$/i);
+    if (titleMatch) {
+      caption = titleMatch[1].trim();
+    }
+  }
+
+  return { caption, authorHandle };
+}
+
+/**
+ * Cleans raw Instagram captions by stripping AI alt-text ("Photo by ... May be an image of..."),
+ * hashtag blocks, "link in bio" boilerplate, extracting Naira prices if present,
+ * and inferring the best 9jaLive feed category.
  */
 export function cleanInstagramCaption(
   rawCaption: string | null | undefined,
@@ -83,6 +117,13 @@ export function cleanInstagramCaption(
   }
 
   let text = rawCaption.trim();
+
+  // 0. Strip Instagram automated AI accessibility alt-text prefixes/suffixes if present
+  text = text
+    .replace(/^(?:Photo|Video|Reel)\s+by\s+[^\n.]+?\s+on\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}\.?\s*/i, '')
+    .replace(/^(?:Photo|Video|Reel)\s+shared\s+by\s+[^\n.]+?\s+on\s+[A-Za-z]+\s+\d{1,2},\s+\d{4}[^.]*\.?\s*/i, '')
+    .replace(/\bMay be an? (?:image|graphic|photo|video|illustration|meme) of [^.\n]+\.?\s*/gi, '')
+    .trim();
 
   // 1. Remove trailing blocks of hashtags (e.g. "\n.\n.\n#calabar #crs #nigeria")
   text = text.replace(/(?:[\r\n]+\s*[.•·-]\s*)+[\r\n]*/g, '\n\n');
@@ -211,7 +252,7 @@ export async function resolveCalabarInstagramTargets(filterSlugOrHandle?: string
       .trim()
       .replace(/^@/, '')
       .replace(/^https?:\/\/(www\.)?instagram\.com\//i, '')
-      .replace(/\/.*$/, '')
+      .replace(/[/?#].*$/, '')
       .trim();
 
     if (!cleanHandle) continue;
@@ -240,6 +281,53 @@ export async function resolveCalabarInstagramTargets(filterSlugOrHandle?: string
 }
 
 /**
+ * Resolves a post's timestamp (Date) from either `timestampIso` or an Instagram alt-text date
+ * such as "Photo by Channel View Hotel on October 27, 2026."
+ */
+export function extractInstagramPostDate(
+  timestampIso?: string | null,
+  rawCaption?: string | null
+): Date | null {
+  if (timestampIso) {
+    const parsed = new Date(timestampIso);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
+  }
+
+  if (rawCaption && typeof rawCaption === 'string') {
+    const altDateMatch = rawCaption.match(
+      /\bon\s+(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{4})\b/i
+    );
+    if (altDateMatch) {
+      const parsed = new Date(`${altDateMatch[1]} ${altDateMatch[2]}, ${altDateMatch[3]} 12:00:00 UTC`);
+      if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Checks whether an Instagram post is fresh within `maxAgeDays` (default 7 days = this week).
+ * If a post has no recognizable date at all, it is considered outdated/unverified when strict freshness is enabled.
+ */
+export function isInstagramPostFresh(
+  post: { timestampIso?: string | null; caption?: string | null },
+  maxAgeDays: number = 7,
+  now: Date = new Date()
+): { isFresh: boolean; postDate: Date | null; ageDays: number | null } {
+  const postDate = extractInstagramPostDate(post.timestampIso, post.caption);
+  if (!postDate) {
+    return { isFresh: false, postDate: null, ageDays: null };
+  }
+
+  const diffMs = now.getTime() - postDate.getTime();
+  const ageDays = diffMs / (1000 * 60 * 60 * 24);
+  // Allow slight future clock skew up to 2 days (timezone differences) and up to maxAgeDays old
+  const isFresh = ageDays <= maxAgeDays && ageDays >= -2;
+  return { isFresh, postDate, ageDays: Math.max(0, Math.round(ageDays * 10) / 10) };
+}
+
+/**
  * Idempotently saves an Instagram post into `Post` (and its photo into `Asset` so CDN links never expire).
  */
 export async function syncInstagramPostToCityOS(
@@ -250,11 +338,24 @@ export async function syncInstagramPostToCityOS(
     defaultCategory?: string;
     address?: string | null;
   },
-  post: RawInstagramPostInput
-): Promise<{ action: 'created' | 'skipped_duplicate' | 'skipped_low_signal'; postId?: string }> {
+  post: RawInstagramPostInput,
+  options?: { maxAgeDays?: number }
+): Promise<{
+  action: 'created' | 'skipped_duplicate' | 'skipped_low_signal' | 'skipped_outdated';
+  postId?: string;
+  ageDays?: number | null;
+}> {
   const shortcode = (post.shortcode || '').trim();
   if (!shortcode) {
     throw new Error('Instagram post shortcode is required for deduplication');
+  }
+
+  // 0. Check freshness window if maxAgeDays is specified (e.g., 7 days for "only this week's posts")
+  if (typeof options?.maxAgeDays === 'number' && options.maxAgeDays > 0) {
+    const freshness = isInstagramPostFresh(post, options.maxAgeDays);
+    if (!freshness.isFresh) {
+      return { action: 'skipped_outdated', ageDays: freshness.ageDays };
+    }
   }
 
   // 1. Check deduplication via @@unique([linkedEntityType, linkedEntityId])

@@ -2,6 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   cleanInstagramCaption,
+  isInstagramPostFresh,
+  parseInstagramMetaCaption,
   resolveCalabarInstagramTargets,
   syncInstagramPostToCityOS,
 } from './instagram-sync';
@@ -39,6 +41,59 @@ Click the link in our bio to reserve a table.
       'MedPlus Pharmacy'
     );
     assert.equal(promoCaption.category, 'Marketplace');
+  });
+
+  it('2b. Filters out outdated posts older than maxAgeDays (e.g., 7 days for this week only)', async () => {
+    const now = new Date('2026-10-29T12:00:00Z');
+
+    // Fresh post from yesterday via alt-text date
+    const freshCheck = isInstagramPostFresh(
+      { caption: 'Video by THE HOTROOM CALABAR on October 28, 2026. May be an image of night and text.' },
+      7,
+      now
+    );
+    assert.equal(freshCheck.isFresh, true);
+
+    // Outdated post from 2024 via alt-text date
+    const oldCheck = isInstagramPostFresh(
+      { caption: 'Photo by Official Bulavaad on July 25, 2024.' },
+      7,
+      now
+    );
+    assert.equal(oldCheck.isFresh, false);
+
+    // Verify syncInstagramPostToCityOS skips outdated posts when maxAgeDays is provided
+    const skippedRes = await syncInstagramPostToCityOS(
+      {
+        organizationId: '00000000-0000-0000-0000-000000000000',
+        slug: 'test-org',
+        name: 'Test Org',
+      },
+      {
+        shortcode: `OLD_IG_${Date.now()}`,
+        caption: 'Photo by Test Org on January 10, 2023.',
+        instagramHandle: 'testorg',
+      },
+      { maxAgeDays: 7 }
+    );
+    assert.equal(skippedRes.action, 'skipped_outdated');
+  });
+
+  it('2c. Parses real caption + official author handle from permalink meta tags and strips AI alt-text', () => {
+    const parsed = parseInstagramMetaCaption(
+      'Channel View Hotel on Instagram: "POV: You just checked into the best stay in the city of calabar. 🥂💫"',
+      '13 likes, 1 comments - channelviewhotel on October 27, 2026: "POV: You just checked into the best stay in the city of calabar. 🥂💫\n\nWelcome to Channel View Hotels.". '
+    );
+    assert.equal(parsed.authorHandle, 'channelviewhotel');
+    assert.ok(parsed.caption?.includes('POV: You just checked into the best stay'));
+
+    const cleaned = cleanInstagramCaption(
+      'Video by THE HOTROOM CALABAR on October 28, 2026. May be an image of night and text. Hotroom by amber🔥🔥🔥🔥🔥',
+      'Amber Karaoke Lounge'
+    );
+    assert.ok(!cleaned.content.includes('May be an image of'));
+    assert.ok(!cleaned.content.includes('Video by THE HOTROOM'));
+    assert.ok(cleaned.content.includes('Hotroom by amber'));
   });
 
   it('3. Resolves Calabar Instagram targets and idempotently syncs post + permanent Asset', async () => {

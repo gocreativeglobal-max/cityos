@@ -6,6 +6,8 @@ import {
   resolveCalabarInstagramTargets,
   syncInstagramPostToCityOS,
   cleanInstagramCaption,
+  isInstagramPostFresh,
+  parseInstagramMetaCaption,
   type RawInstagramPostInput,
 } from '../lib/instagram-sync';
 
@@ -19,10 +21,13 @@ function parseArgs() {
     org?: string;
     handle?: string;
     limit: number;
+    maxAgeDays: number;
     dryRun: boolean;
     headed: boolean;
+    chromeProfile?: string;
   } = {
     limit: 2,
+    maxAgeDays: 7, // Default: only fresh posts from this week (last 7 days)
     dryRun: false,
     headed: false,
   };
@@ -30,10 +35,15 @@ function parseArgs() {
   for (const arg of args) {
     if (arg === '--dry-run') opts.dryRun = true;
     else if (arg === '--headed') opts.headed = true;
+    else if (arg === '--all-time') opts.maxAgeDays = 0;
     else if (arg.startsWith('--target=')) opts.target = arg.split('=')[1];
     else if (arg.startsWith('--org=')) opts.org = arg.split('=')[1];
     else if (arg.startsWith('--handle=')) opts.handle = arg.split('=')[1]?.replace(/^@/, '');
-    else if (arg.startsWith('--limit=')) {
+    else if (arg.startsWith('--chrome-profile=')) opts.chromeProfile = arg.slice('--chrome-profile='.length).replace(/^["']|["']$/g, '');
+    else if (arg.startsWith('--max-age-days=')) {
+      const d = Number(arg.split('=')[1]);
+      if (!Number.isNaN(d) && d >= 0) opts.maxAgeDays = d;
+    } else if (arg.startsWith('--limit=')) {
       const n = Number(arg.split('=')[1]);
       if (!Number.isNaN(n) && n > 0 && n <= 12) opts.limit = n;
     }
@@ -132,21 +142,120 @@ async function main() {
     process.exit(0);
   }
 
-  console.log(`📋 Target businesses to check: ${targets.length} (limit: ${opts.limit} posts/business)`);
-  if (!fs.existsSync(PROFILE_DIR)) {
-    console.log('ℹ️ Tip: Run "npm run social:login" first if Instagram asks for login authentication.\n');
+  console.log(
+    `📋 Target businesses to check: ${targets.length} (limit: ${opts.limit} posts/business, freshness: ${
+      opts.maxAgeDays > 0 ? `last ${opts.maxAgeDays} days` : 'all-time'
+    })`
+  );
+  let context: any = null;
+  let attachedViaCdp = false;
+
+  // 1. Try attaching to an already-open Chrome with remote debugging on port 9222
+  try {
+    const browser = await chromium.connectOverCDP('http://127.0.0.1:9222', { timeout: 2000 });
+    context = browser.contexts()[0] || (await browser.newContext());
+    attachedViaCdp = true;
+    console.log('🔗 Attached directly to your open Chrome browser (port 9222)!');
+  } catch {}
+
+  // 2. Or launch using a cloned copy of existing Windows Chrome profile if --chrome-profile is passed
+  if (!context && opts.chromeProfile) {
+    const systemUserData = path.join(process.env.LOCALAPPDATA || '', 'Google/Chrome/User Data');
+    let profileDirName = opts.chromeProfile;
+    let friendlyName = opts.chromeProfile;
+    try {
+      const localState = JSON.parse(fs.readFileSync(path.join(systemUserData, 'Local State'), 'utf8'));
+      const cache = localState?.profile?.info_cache || {};
+      for (const [dir, info] of Object.entries<any>(cache)) {
+        if (
+          dir.toLowerCase() === opts.chromeProfile.toLowerCase() ||
+          info?.name?.toLowerCase() === opts.chromeProfile.toLowerCase() ||
+          info?.user_name?.toLowerCase() === opts.chromeProfile.toLowerCase()
+        ) {
+          profileDirName = dir;
+          friendlyName = info?.name || dir;
+          break;
+        }
+      }
+    } catch {}
+
+    const srcProfileDir = path.join(systemUserData, profileDirName);
+    const clonedUserDataDir = path.join(AUTH_DIR, `chrome-${profileDirName.replace(/\s+/g, '-')}`);
+    const clonedProfileDir = path.join(clonedUserDataDir, profileDirName);
+    const clonedCookiesPath = path.join(clonedProfileDir, 'Network', 'Cookies');
+    const srcCookiesPath = path.join(srcProfileDir, 'Network', 'Cookies');
+
+    if (!fs.existsSync(clonedCookiesPath) && fs.existsSync(srcCookiesPath)) {
+      let warned = false;
+      while (true) {
+        try {
+          const testBuf = fs.readFileSync(srcCookiesPath);
+          if (testBuf.length > 0) break;
+        } catch (err: any) {
+          if (err?.code === 'EBUSY' || err?.code === 'EPERM') {
+            if (!warned) {
+              console.log(`\n⏳ Your "${friendlyName}" (${profileDirName}) Chrome window is currently open.`);
+              console.log(`👉 Please close ONLY the "${friendlyName}" Chrome window for 2 seconds so we can import its session...`);
+              warned = true;
+            }
+            await new Promise((r) => setTimeout(r, 1500));
+            continue;
+          }
+          break;
+        }
+      }
+
+      console.log(`📦 Importing login session from Chrome profile "${friendlyName}" (${profileDirName})...`);
+      fs.mkdirSync(path.join(clonedProfileDir, 'Network'), { recursive: true });
+      try {
+        fs.copyFileSync(path.join(systemUserData, 'Local State'), path.join(clonedUserDataDir, 'Local State'));
+      } catch {}
+      for (const file of ['Preferences', 'Secure Preferences', 'Web Data', 'Login Data']) {
+        const s = path.join(srcProfileDir, file);
+        if (fs.existsSync(s)) {
+          try {
+            fs.copyFileSync(s, path.join(clonedProfileDir, file));
+          } catch {}
+        }
+      }
+      try {
+        fs.copyFileSync(srcCookiesPath, clonedCookiesPath);
+      } catch {}
+      const srcLocalStorage = path.join(srcProfileDir, 'Local Storage');
+      if (fs.existsSync(srcLocalStorage)) {
+        try {
+          fs.cpSync(srcLocalStorage, path.join(clonedProfileDir, 'Local Storage'), { recursive: true });
+        } catch {}
+      }
+      console.log(`✅ Imported "${friendlyName}" session into .auth! (You can now re-open your normal Chrome anytime.)\n`);
+    }
+
+    console.log(`🌐 Launching isolated Playwright Chrome with profile "${friendlyName}" (${profileDirName})...`);
+    context = await chromium.launchPersistentContext(clonedUserDataDir, {
+      channel: 'chrome',
+      headless: !opts.headed,
+      viewport: { width: 1280, height: 840 },
+      args: [`--profile-directory=${profileDirName}`, '--disable-blink-features=AutomationControlled'],
+    });
   }
 
-  const context = await chromium.launchPersistentContext(PROFILE_DIR, {
-    channel: 'chrome',
-    headless: !opts.headed,
-    viewport: { width: 1280, height: 840 },
-    args: ['--disable-blink-features=AutomationControlled'],
-  });
+  // 3. Default to dedicated .auth/instagram-profile
+  if (!context) {
+    if (!fs.existsSync(PROFILE_DIR)) {
+      console.log('ℹ️ Tip: Run "npm run social:login" first if Instagram asks for login authentication.\n');
+    }
+    context = await chromium.launchPersistentContext(PROFILE_DIR, {
+      channel: 'chrome',
+      headless: !opts.headed,
+      viewport: { width: 1280, height: 840 },
+      args: ['--disable-blink-features=AutomationControlled'],
+    });
+  }
 
-  const page = context.pages()[0] || (await context.newPage());
+  const page = attachedViaCdp ? await context.newPage() : (context.pages()[0] || (await context.newPage()));
   let totalCreated = 0;
   let totalDuplicates = 0;
+  let totalOutdated = 0;
 
   for (let i = 0; i < targets.length; i++) {
     const target = targets[i];
@@ -235,6 +344,68 @@ async function main() {
       console.log(`   Found ${postsToProcess.length} recent post(s) on @${target.instagramHandle}`);
 
       for (const rawPost of postsToProcess) {
+        // Check freshness BEFORE downloading image buffer or visiting permalink
+        if (opts.maxAgeDays > 0) {
+          const freshness = isInstagramPostFresh(rawPost, opts.maxAgeDays);
+          if (!freshness.isFresh) {
+            totalOutdated++;
+            const ageStr =
+              freshness.ageDays !== null
+                ? `${freshness.ageDays}d old (${freshness.postDate?.toISOString().slice(0, 10)})`
+                : 'unknown/unverified date';
+            console.log(`   ⏭️ Skipped ${rawPost.shortcode} (outdated: ${ageStr} > ${opts.maxAgeDays}d limit)`);
+            continue;
+          }
+        }
+
+        // If the caption came from DOM img alt-text ("Photo by ... on Date. May be an image of..."),
+        // navigate to the post permalink to extract the REAL business caption & verify official author!
+        const looksLikeAltText =
+          !rawPost.caption ||
+          /^(?:Photo|Video|Reel)\s+(?:by|shared by)\s+/i.test(rawPost.caption.trim()) ||
+          /\bMay be an? (?:image|graphic|photo|video)\b/i.test(rawPost.caption);
+
+        if (looksLikeAltText) {
+          try {
+            const postUrl = rawPost.permalink || `https://www.instagram.com/p/${rawPost.shortcode}/`;
+            await page.goto(postUrl, { waitUntil: 'domcontentloaded', timeout: 25000 });
+            await page.waitForTimeout(2500);
+
+            const permalinkMeta = await page.evaluate(() => {
+              const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content') || '';
+              const ogDesc =
+                document.querySelector('meta[property="og:description"]')?.getAttribute('content') ||
+                document.querySelector('meta[name="description"]')?.getAttribute('content') ||
+                '';
+              const timeIso = document.querySelector('time')?.getAttribute('datetime') || '';
+              return { ogTitle, ogDesc, timeIso };
+            });
+
+            if (permalinkMeta.timeIso && !rawPost.timestampIso) {
+              rawPost.timestampIso = permalinkMeta.timeIso;
+            }
+
+            const parsedMeta = parseInstagramMetaCaption(permalinkMeta.ogTitle, permalinkMeta.ogDesc);
+
+            // Strict official account check: if the post was uploaded by a different handle (e.g., third-party collab), skip it
+            if (
+              parsedMeta.authorHandle &&
+              parsedMeta.authorHandle.toLowerCase() !== target.instagramHandle.toLowerCase()
+            ) {
+              console.log(
+                `   ⏭️ Skipped ${rawPost.shortcode} (third-party collab by @${parsedMeta.authorHandle}, not official @${target.instagramHandle})`
+              );
+              continue;
+            }
+
+            if (parsedMeta.caption) {
+              rawPost.caption = parsedMeta.caption;
+            }
+          } catch (permErr) {
+            console.warn(`   ⚠️ Could not fetch permalink details for ${rawPost.shortcode}`);
+          }
+        }
+
         // Download image bytes so it is permanently hosted in 9jaLive Asset table
         if (rawPost.fallbackImageUrl && !opts.dryRun) {
           try {
@@ -251,20 +422,28 @@ async function main() {
 
         if (opts.dryRun) {
           const preview = cleanInstagramCaption(rawPost.caption, target.name, target.defaultCategory);
-          console.log(`   [DRY-RUN] Post ${rawPost.shortcode}:`);
+          const freshness = isInstagramPostFresh(rawPost, opts.maxAgeDays || 36500);
+          console.log(
+            `   [DRY-RUN] ✨ FRESH Post ${rawPost.shortcode} (${
+              freshness.postDate ? freshness.postDate.toISOString().slice(0, 10) : 'recent'
+            }):`
+          );
           console.log(`     Title:    ${preview.title}`);
           console.log(`     Category: ${preview.category}`);
           console.log(`     Content:  ${preview.content.slice(0, 120)}...`);
           continue;
         }
 
-        const res = await syncInstagramPostToCityOS(target, rawPost);
+        const res = await syncInstagramPostToCityOS(target, rawPost, { maxAgeDays: opts.maxAgeDays });
         if (res.action === 'created') {
           totalCreated++;
-          console.log(`   ✅ Published post ${rawPost.shortcode} -> 9jaLive Post ID: ${res.postId}`);
+          console.log(`   ✅ Published fresh post ${rawPost.shortcode} -> 9jaLive Post ID: ${res.postId}`);
         } else if (res.action === 'skipped_duplicate') {
           totalDuplicates++;
           console.log(`   ⏭️ Skipped ${rawPost.shortcode} (already on 9jaLive)`);
+        } else if (res.action === 'skipped_outdated') {
+          totalOutdated++;
+          console.log(`   ⏭️ Skipped ${rawPost.shortcode} (outdated: ${res.ageDays ?? '?'}d old)`);
         } else {
           console.log(`   ⏭️ Skipped ${rawPost.shortcode} (low signal / empty)`);
         }
@@ -282,9 +461,15 @@ async function main() {
     }
   }
 
-  await context.close();
+  if (attachedViaCdp) {
+    await page.close().catch(() => {});
+  } else {
+    await context.close();
+  }
   console.log('\n=============================================================');
-  console.log(`🎉 Sync Complete! Created: ${totalCreated} new post(s), Skipped duplicates: ${totalDuplicates}`);
+  console.log(
+    `🎉 Sync Complete! Created: ${totalCreated} fresh post(s), Skipped outdated: ${totalOutdated}, Skipped duplicates: ${totalDuplicates}`
+  );
   console.log('=============================================================\n');
   process.exit(0);
 }
