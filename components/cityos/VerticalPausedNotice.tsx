@@ -44,10 +44,10 @@ export default function VerticalPausedNotice({
           <ArrowLeft className="w-4 h-4" /> Back to 9jaLive Home
         </Link>
         <Link
-          href="/food"
-          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5"
+          href="/"
+          className="w-full sm:w-auto px-6 py-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors inline-flex items-center justify-center gap-1.5 shadow-xs"
         >
-          Explore CityFood <ArrowRight className="w-3.5 h-3.5" />
+          Explore 9jaLive Shop <ArrowRight className="w-3.5 h-3.5" />
         </Link>
       </div>
     </div>

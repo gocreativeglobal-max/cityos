@@ -9,6 +9,8 @@ import {
   type PlatformVerticalsConfig,
   type VerticalId,
   DEFAULT_VERTICALS_CONFIG,
+  PILOT_SHOP_ONLY_MODE,
+  PILOT_VERTICALS_CONFIG,
 } from '@/lib/verticals-constants';
 
 export type { PlatformVerticalsConfig, VerticalId };
@@ -17,22 +19,23 @@ const CONFIG_SLUG = 'platform-verticals-config';
 
 /**
  * Public/Resident read: Get current platform verticals configuration.
- * Safe fallback to DEFAULT_VERTICALS_CONFIG if not yet configured or on db error.
+ * Safe fallback to PILOT_VERTICALS_CONFIG (or DEFAULT_VERTICALS_CONFIG) if not yet configured or on db error.
  */
 export async function getVerticalsConfig(): Promise<PlatformVerticalsConfig> {
+  const baseConfig = PILOT_SHOP_ONLY_MODE ? PILOT_VERTICALS_CONFIG : DEFAULT_VERTICALS_CONFIG;
   try {
     const listing = await db.orm.public.DiscoveryListing.where({ slug: CONFIG_SLUG }).all().first();
     if (listing?.metadata) {
       const parsed = JSON.parse(listing.metadata);
       return {
-        ...DEFAULT_VERTICALS_CONFIG,
+        ...baseConfig,
         ...parsed,
       };
     }
   } catch (err) {
     console.warn('[getVerticalsConfig] Error reading config from db:', err);
   }
-  return DEFAULT_VERTICALS_CONFIG;
+  return baseConfig;
 }
 
 /**

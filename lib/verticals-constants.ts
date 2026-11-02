@@ -89,3 +89,20 @@ export const DEFAULT_VERTICALS_CONFIG: PlatformVerticalsConfig = {
   events: true,
   citypay: false,
 };
+
+/**
+ * Pilot Stage Flag: Shop-First E-Commerce Mode (Jumia-style).
+ * When enabled, the resident platform focuses exclusively on Shopping & E-Commerce,
+ * while keeping all other verticals fully intact in the backend ready for staged rollout.
+ */
+export const PILOT_SHOP_ONLY_MODE = true;
+
+export const PILOT_VERTICALS_CONFIG: PlatformVerticalsConfig = {
+  jobs: false,
+  houses: false,
+  shops: true,
+  food: false,
+  services: false,
+  events: false,
+  citypay: false,
+};

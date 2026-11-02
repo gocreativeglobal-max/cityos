@@ -3,6 +3,7 @@ import { authOptions } from '@/lib/auth';
 import { findPersonByEmail } from '@/lib/identity';
 import { getVerticalsConfig } from '@/lib/actions/verticals-config';
 import CityHome from '@/components/cityos/CityHome';
+import CityMarket from '@/components/cityos/CityMarket';
 
 export default async function HomePage() {
   const session = await getServerSession(authOptions);
@@ -20,6 +21,19 @@ export default async function HomePage() {
   }
 
   const verticalsConfig = await getVerticalsConfig();
+
+  // In Shop-First pilot mode, render the Jumia-style City Marketplace directly as the home screen!
+  const isShopOnly =
+    verticalsConfig.shops &&
+    !verticalsConfig.food &&
+    !verticalsConfig.houses &&
+    !verticalsConfig.jobs &&
+    !verticalsConfig.services &&
+    !verticalsConfig.events;
+
+  if (isShopOnly) {
+    return <CityMarket />;
+  }
 
   return <CityHome firstName={firstName} verticalsConfig={verticalsConfig} />;
 }

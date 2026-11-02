@@ -440,14 +440,30 @@ export default function ResidentShell({
   const [menuOpen, setMenuOpen] = useState(false);
   const citypayEnabled = verticalsConfig?.citypay === true;
 
+  const isShopOnly =
+    verticalsConfig?.shops !== false &&
+    verticalsConfig?.food === false &&
+    verticalsConfig?.houses === false &&
+    verticalsConfig?.jobs === false &&
+    verticalsConfig?.services === false &&
+    verticalsConfig?.events === false;
+
   type NavItem = { id: string; path: string; label: string; icon: any; iconKey?: string; imageUrl?: string; secondary?: boolean; verticalId?: VerticalId };
 
-  const PRIMARY_NAV: NavItem[] = [
-    { id: 'home', path: '/', label: 'Home', icon: HomeIcon, iconKey: 'home' },
-    { id: 'create', path: '/create', label: 'Create', icon: PenSquare, iconKey: 'create' },
-    { id: 'activity', path: '/activity', label: 'Activity', icon: ShoppingBag, iconKey: 'activity' },
-    { id: 'profile', path: '/profile', label: 'Profile', icon: UserIcon, iconKey: 'profile' },
-  ];
+  const PRIMARY_NAV: NavItem[] = isShopOnly
+    ? [
+        { id: 'shop', path: '/', label: 'Shop', icon: Store, iconKey: 'shop', imageUrl: '/icons/portals/shop.png' },
+        { id: 'directory', path: '/directory', label: 'Stores & Malls', icon: Building2, iconKey: 'directory' },
+        { id: 'orders', path: '/orders', label: 'My Orders', icon: ShoppingBag, iconKey: 'orders' },
+        { id: 'saved', path: '/saved', label: 'Saved Items', icon: Bookmark, iconKey: 'saved' },
+        { id: 'profile', path: '/profile', label: 'Account', icon: UserIcon, iconKey: 'profile' },
+      ]
+    : [
+        { id: 'home', path: '/', label: 'Home', icon: HomeIcon, iconKey: 'home' },
+        { id: 'create', path: '/create', label: 'Create', icon: PenSquare, iconKey: 'create' },
+        { id: 'activity', path: '/activity', label: 'Activity', icon: ShoppingBag, iconKey: 'activity' },
+        { id: 'profile', path: '/profile', label: 'Profile', icon: UserIcon, iconKey: 'profile' },
+      ];
 
   const ALL_EXPLORE_ITEMS: (NavItem & { verticalId?: VerticalId })[] = [
     { id: 'market', path: '/market', label: 'Shop', icon: Store, iconKey: 'shop', imageUrl: '/icons/portals/shop.png', verticalId: 'shops' },
@@ -463,41 +479,53 @@ export default function ResidentShell({
     return verticalsConfig[item.verticalId] !== false;
   });
 
-  const navGroups: { label: string; items: NavItem[] }[] = [
-    {
-      label: 'Explore',
-      items: exploreItems,
-    },
-    {
-      label: 'Discover',
-      items: [
-        { id: 'directory', path: '/directory', label: 'Directory', icon: Building2, iconKey: 'directory' },
-        { id: 'notifications', path: '/notifications', label: 'Notifications', icon: Bell, iconKey: 'notifications' },
-        { id: 'nearby', path: '/explore', label: 'Nearby', icon: MapPin, iconKey: 'nearby', imageUrl: '/icons/portals/explore.png' },
-        { id: 'saved', path: '/saved', label: 'Saved', icon: Bookmark, iconKey: 'saved' },
-        { id: 'ai', path: '/ai', label: 'Ask 9jaLive', icon: Sparkles, iconKey: 'ai' },
-      ],
-    },
-    {
-      label: 'Your Activity',
-      items: [
-        { id: 'orders', path: '/orders', label: 'Orders', icon: ShoppingBag, iconKey: 'orders' },
-        { id: 'requests', path: '/tasks', label: 'Service Requests', icon: Wrench, iconKey: 'requests', imageUrl: '/icons/portals/services.png' },
-        { id: 'apps', path: '/jobs', label: 'Job Applications', icon: Briefcase, iconKey: 'apps', imageUrl: '/icons/portals/jobs.png' },
-        { id: 'events', path: '/events', label: 'Events', icon: Calendar, iconKey: 'events' },
-      ],
-    },
-    {
-      label: 'Settings',
-      items: [
-        { id: 'settings', path: '/profile?tab=Settings', label: 'Settings', icon: Settings, iconKey: 'settings' },
-        { id: 'help', path: '/ai', label: 'Help', icon: HelpCircle, iconKey: 'help' },
-      ],
-    },
-  ];
+  const navGroups: { label: string; items: NavItem[] }[] = isShopOnly
+    ? [
+        {
+          label: 'Customer Support',
+          items: [
+            { id: 'notifications', path: '/notifications', label: 'Notifications', icon: Bell, iconKey: 'notifications' },
+            { id: 'ai', path: '/ai', label: 'Shopping Assistant', icon: Sparkles, iconKey: 'ai' },
+            { id: 'settings', path: '/profile?tab=Settings', label: 'Settings', icon: Settings, iconKey: 'settings' },
+          ],
+        },
+      ]
+    : [
+        {
+          label: 'Explore',
+          items: exploreItems,
+        },
+        {
+          label: 'Discover',
+          items: [
+            { id: 'directory', path: '/directory', label: 'Directory', icon: Building2, iconKey: 'directory' },
+            { id: 'notifications', path: '/notifications', label: 'Notifications', icon: Bell, iconKey: 'notifications' },
+            { id: 'nearby', path: '/explore', label: 'Nearby', icon: MapPin, iconKey: 'nearby', imageUrl: '/icons/portals/explore.png' },
+            { id: 'saved', path: '/saved', label: 'Saved', icon: Bookmark, iconKey: 'saved' },
+            { id: 'ai', path: '/ai', label: 'Ask 9jaLive', icon: Sparkles, iconKey: 'ai' },
+          ],
+        },
+        {
+          label: 'Your Activity',
+          items: [
+            { id: 'orders', path: '/orders', label: 'Orders', icon: ShoppingBag, iconKey: 'orders' },
+            { id: 'requests', path: '/tasks', label: 'Service Requests', icon: Wrench, iconKey: 'requests', imageUrl: '/icons/portals/services.png' },
+            { id: 'apps', path: '/jobs', label: 'Job Applications', icon: Briefcase, iconKey: 'apps', imageUrl: '/icons/portals/jobs.png' },
+            { id: 'events', path: '/events', label: 'Events', icon: Calendar, iconKey: 'events' },
+          ],
+        },
+        {
+          label: 'Settings',
+          items: [
+            { id: 'settings', path: '/profile?tab=Settings', label: 'Settings', icon: Settings, iconKey: 'settings' },
+            { id: 'help', path: '/ai', label: 'Help', icon: HelpCircle, iconKey: 'help' },
+          ],
+        },
+      ];
 
   const getTitle = () => {
     if (!pathname) return '9jaLive';
+    if (pathname === '/' && isShopOnly) return '9jaLive Shop';
     if (pathname.startsWith('/ai')) return 'Ask 9jaLive';
     if (pathname.startsWith('/feed')) return 'Newsfeed';
     if (pathname.startsWith('/directory')) return 'Business Directory';
@@ -884,15 +912,24 @@ export default function ResidentShell({
           {/* Mobile Bottom Navigation - only in resident mode */}
           {!isWorkspace && (
             <nav className="md:hidden absolute bottom-0 left-0 right-0 bg-white border-t border-[#EBEBEB] flex items-center justify-between px-3 h-16 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-              {[
-                { id: 'home', path: '/', label: 'Home', icon: HomeIcon },
-                { id: 'explore', path: '/explore', label: 'Explore', icon: Search },
-                citypayEnabled
-                  ? { id: 'wallet', path: '/wallet', label: 'CityPay', icon: WalletIcon }
-                  : { id: 'create', path: '/create', label: 'Create', icon: PenSquare },
-                { id: 'activity', path: '/activity', label: 'Activity', icon: ShoppingBag },
-                { id: 'profile', path: '/profile', label: 'Profile', icon: UserIcon },
-              ].map((item) => {
+              {(isShopOnly
+                ? [
+                    { id: 'shop', path: '/', label: 'Shop', icon: Store },
+                    { id: 'directory', path: '/directory', label: 'Stores', icon: Building2 },
+                    { id: 'cart', path: '/checkout', label: 'Cart', icon: ShoppingCart },
+                    { id: 'orders', path: '/orders', label: 'Orders', icon: ShoppingBag },
+                    { id: 'profile', path: '/profile', label: 'Account', icon: UserIcon },
+                  ]
+                : [
+                    { id: 'home', path: '/', label: 'Home', icon: HomeIcon },
+                    { id: 'explore', path: '/explore', label: 'Explore', icon: Search },
+                    citypayEnabled
+                      ? { id: 'wallet', path: '/wallet', label: 'CityPay', icon: WalletIcon }
+                      : { id: 'create', path: '/create', label: 'Create', icon: PenSquare },
+                    { id: 'activity', path: '/activity', label: 'Activity', icon: ShoppingBag },
+                    { id: 'profile', path: '/profile', label: 'Profile', icon: UserIcon },
+                  ]
+              ).map((item) => {
                 const active = isActive(item.path);
                 return (
                   <Link
