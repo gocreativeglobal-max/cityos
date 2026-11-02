@@ -391,45 +391,7 @@ export default function CityMarket() {
         )}
       </section>
 
-      {/* 3. Partner Stores Horizontal Rail */}
-      {filteredStores.length > 0 && (
-        <section className="space-y-3 pt-1">
-          <div className="flex items-center justify-between px-1">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                <Store className="w-4 h-4 text-emerald-600" />
-                Verified Shops & Stores
-              </h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Tap a shop to browse its categorized aisles in {activeArea === 'all' ? cityName : activeArea}
-              </p>
-            </div>
-            <Link
-              href="/explore?cat=Retail"
-              className="text-xs font-bold text-slate-500 hover:text-slate-900 flex items-center gap-1 transition-colors"
-            >
-              <span>View all</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </Link>
-          </div>
-
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-1 px-1 no-scrollbar snap-x">
-            {filteredStores.map((store) => (
-              <div key={store.id} className="w-72 sm:w-80 shrink-0 snap-start">
-                <ChowdeckStoreCard
-                  store={{
-                    ...store,
-                    href: `/org/${store.id}`,
-                  }}
-                  aspectRatio="16/9"
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* 4. MAIN PRODUCTS CATALOG */}
+      {/* MAIN PRODUCTS CATALOG */}
       <section id="market-catalog-section" className="space-y-6 pt-1 scroll-mt-20">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/80 pb-3">
           <div className="flex flex-col gap-1">
