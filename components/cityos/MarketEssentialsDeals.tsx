@@ -1,209 +1,68 @@
 'use client';
 
-import {
-  Smartphone,
-  Laptop,
-  Tv,
-  ShoppingBasket,
-  Shirt,
-  Footprints,
-  Baby,
-  Home,
-  Armchair,
-  Headphones,
-  Sparkles,
-  ArrowRight,
-  Flame,
-} from 'lucide-react';
+import Image from 'next/image';
+import { ArrowRight, Flame, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export interface EssentialDealItem {
+export interface EssentialCategoryItem {
   id: string;
   title: string;
   subtitle: string;
+  image: string;
+  alt: string;
   categoryId?: string;
   searchKeyword?: string;
-  icon: any;
-  colorScheme: {
-    bg: string;
-    border: string;
-    iconBg: string;
-    iconColor: string;
-    badgeBg: string;
-    badgeText: string;
-  };
+  badge?: string;
 }
 
-export const ESSENTIAL_DEALS_DATA: EssentialDealItem[] = [
+/**
+ * The 5 Core Essentials Categories configured from public/images/categories/
+ */
+export const ESSENTIAL_CATEGORIES_DATA: EssentialCategoryItem[] = [
   {
-    id: 'phones-tablets',
+    id: 'mobile-phones',
     title: 'Phones & Tablets',
     subtitle: 'Deals made for you',
+    badge: 'Popular',
+    image: '/images/categories/mobile-phones.jpg',
+    alt: 'Phones & Tablets',
     categoryId: 'phones-iphones-tablets',
-    icon: Smartphone,
-    colorScheme: {
-      bg: 'hover:border-orange-300 hover:bg-orange-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-orange-100/80',
-      iconColor: 'text-orange-600',
-      badgeBg: 'bg-orange-100/70',
-      badgeText: 'text-orange-700',
-    },
   },
   {
-    id: 'appliances-deals',
-    title: 'Appliances Deals',
+    id: 'electronics',
+    title: 'Electronics & Gadgets',
     subtitle: 'Deals made for you',
-    categoryId: 'home-kitchen-appliances',
-    searchKeyword: 'appliances',
-    icon: Home,
-    colorScheme: {
-      bg: 'hover:border-teal-300 hover:bg-teal-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-teal-100/80',
-      iconColor: 'text-teal-600',
-      badgeBg: 'bg-teal-100/70',
-      badgeText: 'text-teal-700',
-    },
+    badge: 'Best Deals',
+    image: '/images/categories/electronics.jpg',
+    alt: 'Electronics & Gadgets',
+    searchKeyword: 'electronics',
   },
   {
-    id: 'kids-baby-more',
-    title: 'Kids, Baby And More',
+    id: 'agriculture-food',
+    title: 'Food & Groceries',
     subtitle: 'Deals made for you',
-    categoryId: 'baby-kids-toys',
-    icon: Baby,
-    colorScheme: {
-      bg: 'hover:border-amber-300 hover:bg-amber-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-amber-100/80',
-      iconColor: 'text-amber-600',
-      badgeBg: 'bg-amber-100/70',
-      badgeText: 'text-amber-700',
-    },
-  },
-  {
-    id: 'fashion-deals',
-    title: 'Fashion Deals',
-    subtitle: 'Deals made for you',
-    categoryId: 'fashion-shoes-accessories',
-    icon: Shirt,
-    colorScheme: {
-      bg: 'hover:border-rose-300 hover:bg-rose-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-rose-100/80',
-      iconColor: 'text-rose-600',
-      badgeBg: 'bg-rose-100/70',
-      badgeText: 'text-rose-700',
-    },
-  },
-  {
-    id: 'sneakers-deals',
-    title: 'Sneakers Deals',
-    subtitle: 'Deals made for you',
-    categoryId: 'fashion-shoes-accessories',
-    searchKeyword: 'sneakers',
-    icon: Footprints,
-    colorScheme: {
-      bg: 'hover:border-red-300 hover:bg-red-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-red-100/80',
-      iconColor: 'text-red-600',
-      badgeBg: 'bg-red-100/70',
-      badgeText: 'text-red-700',
-    },
-  },
-  {
-    id: 'home-office-deals',
-    title: 'Home & Office Deals',
-    subtitle: 'Deals made for you',
-    categoryId: 'home-kitchen-appliances',
-    searchKeyword: 'office',
-    icon: Armchair,
-    colorScheme: {
-      bg: 'hover:border-indigo-300 hover:bg-indigo-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-indigo-100/80',
-      iconColor: 'text-indigo-600',
-      badgeBg: 'bg-indigo-100/70',
-      badgeText: 'text-indigo-700',
-    },
-  },
-  {
-    id: 'television-deals',
-    title: 'Television Deals',
-    subtitle: 'Deals made for you',
-    categoryId: 'home-kitchen-appliances',
-    searchKeyword: 'tv',
-    icon: Tv,
-    colorScheme: {
-      bg: 'hover:border-sky-300 hover:bg-sky-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-sky-100/80',
-      iconColor: 'text-sky-600',
-      badgeBg: 'bg-sky-100/70',
-      badgeText: 'text-sky-700',
-    },
-  },
-  {
-    id: 'supermarket-deals',
-    title: 'Supermarket Deals',
-    subtitle: 'Deals made for you',
+    badge: 'Fresh',
+    image: '/images/categories/agriculture-food.jpg',
+    alt: 'Agriculture, Food & Groceries',
     categoryId: 'supermarket-groceries',
-    icon: ShoppingBasket,
-    colorScheme: {
-      bg: 'hover:border-emerald-300 hover:bg-emerald-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-emerald-100/80',
-      iconColor: 'text-emerald-600',
-      badgeBg: 'bg-emerald-100/70',
-      badgeText: 'text-emerald-700',
-    },
   },
   {
-    id: 'mobile-accessories-deals',
-    title: 'Mobile Accessories Deals',
+    id: 'fashion',
+    title: 'Fashion & Apparel',
     subtitle: 'Deals made for you',
-    categoryId: 'fast-chargers-cables-extensions',
-    searchKeyword: 'accessories',
-    icon: Headphones,
-    colorScheme: {
-      bg: 'hover:border-purple-300 hover:bg-purple-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-purple-100/80',
-      iconColor: 'text-purple-600',
-      badgeBg: 'bg-purple-100/70',
-      badgeText: 'text-purple-700',
-    },
+    badge: 'Trending',
+    image: '/images/categories/fashion.jpg',
+    alt: 'Fashion & Apparel',
+    categoryId: 'fashion-shoes-accessories',
   },
   {
-    id: 'computing-deals',
-    title: 'Computing Deals',
+    id: 'health-beauty',
+    title: 'Health & Beauty',
     subtitle: 'Deals made for you',
-    categoryId: 'laptops-macbooks-monitors',
-    icon: Laptop,
-    colorScheme: {
-      bg: 'hover:border-blue-300 hover:bg-blue-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-blue-100/80',
-      iconColor: 'text-blue-600',
-      badgeBg: 'bg-blue-100/70',
-      badgeText: 'text-blue-700',
-    },
-  },
-  {
-    id: 'beauty-must-have',
-    title: 'Beauty Must Have',
-    subtitle: 'Deals made for you',
+    badge: 'Verified',
+    image: '/images/categories/health-beauty-clean.jpg',
+    alt: 'Health & Beauty',
     categoryId: 'health-beauty-personal-care',
-    icon: Sparkles,
-    colorScheme: {
-      bg: 'hover:border-pink-300 hover:bg-pink-50/40',
-      border: 'border-slate-200/90',
-      iconBg: 'bg-pink-100/80',
-      iconColor: 'text-pink-600',
-      badgeBg: 'bg-pink-100/70',
-      badgeText: 'text-pink-700',
-    },
   },
 ];
 
@@ -218,7 +77,7 @@ export default function MarketEssentialsDeals({
   onSearchKeyword,
   className,
 }: MarketEssentialsDealsProps) {
-  const handleClick = (item: EssentialDealItem) => {
+  const handleClick = (item: EssentialCategoryItem) => {
     if (item.categoryId && onSelectCategory) {
       onSelectCategory(item.categoryId);
     } else if (item.searchKeyword && onSearchKeyword) {
@@ -234,7 +93,7 @@ export default function MarketEssentialsDeals({
   };
 
   return (
-    <section className={cn('space-y-3.5', className)} aria-label="Essentials & Deals">
+    <section className={cn('space-y-3.5', className)} aria-label="Market Essentials">
       {/* Section Header */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-1 px-1">
         <div>
@@ -247,59 +106,70 @@ export default function MarketEssentialsDeals({
           </h2>
         </div>
         <p className="text-xs font-semibold text-slate-500">
-          Hand-picked offers from top local merchants
+          Curated top categories from verified local merchants
         </p>
       </div>
 
-      {/* Grid of Deal Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
-        {ESSENTIAL_DEALS_DATA.map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => handleClick(item)}
+      {/* Grid of the 5 Category Photo Cards with Footers */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
+        {ESSENTIAL_CATEGORIES_DATA.map((item, idx) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => handleClick(item)}
+            className={cn(
+              'group relative flex flex-col rounded-2xl bg-white border border-slate-200/80 overflow-hidden text-left transition-all duration-300 cursor-pointer shadow-2xs hover:shadow-md hover:-translate-y-1 active:scale-[0.98]',
+              // On mobile (2-columns), make the 5th item stretch gracefully across both columns if needed
+              idx === 4 ? 'col-span-2 sm:col-span-1' : 'col-span-1'
+            )}
+          >
+            {/* Top Photo Container */}
+            <div
               className={cn(
-                'group relative flex flex-col justify-between p-3 sm:p-3.5 rounded-2xl bg-white border text-left transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98]',
-                item.colorScheme.border,
-                item.colorScheme.bg
+                'relative w-full overflow-hidden bg-slate-100',
+                idx === 4
+                  ? 'aspect-[2.2/1] sm:aspect-square'
+                  : 'aspect-square'
               )}
             >
-              {/* Top row: Icon + Arrow */}
-              <div className="flex items-start justify-between gap-2 mb-2.5">
-                <div
-                  className={cn(
-                    'w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110',
-                    item.colorScheme.iconBg,
-                    item.colorScheme.iconColor
-                  )}
-                >
-                  <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+              <Image
+                src={item.image}
+                alt={item.alt}
+                fill
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-108"
+              />
+
+              {/* Pill badge in top corner */}
+              {item.badge && (
+                <div className="absolute top-2.5 left-2.5 z-10">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-black/60 text-white backdrop-blur-md shadow-xs">
+                    <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                    {item.badge}
+                  </span>
                 </div>
-                <div className="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all shrink-0">
+              )}
+            </div>
+
+            {/* Card Footer ("foters") */}
+            <div className="p-3 sm:p-3.5 bg-white flex flex-col justify-between flex-1 border-t border-slate-100 gap-1">
+              <div className="flex items-center justify-between gap-1.5">
+                <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 group-hover:text-orange-600 transition-colors line-clamp-1">
+                  {item.title}
+                </h3>
+                <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-orange-600 group-hover:text-white transition-all shrink-0">
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                 </div>
               </div>
 
-              {/* Text Info */}
-              <div className="space-y-1">
-                <h3 className="text-xs sm:text-sm font-bold text-slate-900 line-clamp-2 group-hover:text-slate-950 leading-snug">
-                  {item.title}
-                </h3>
-                <span
-                  className={cn(
-                    'inline-block px-1.5 py-0.5 rounded-md text-[10px] font-bold tracking-tight',
-                    item.colorScheme.badgeBg,
-                    item.colorScheme.badgeText
-                  )}
-                >
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-medium text-slate-500">
                   {item.subtitle}
                 </span>
               </div>
-            </button>
-          );
-        })}
+            </div>
+          </button>
+        ))}
       </div>
     </section>
   );
