@@ -23,6 +23,7 @@ import {
   Search,
 } from 'lucide-react';
 import { useAccountSwitcher, type BusinessAccount } from '@/components/cityos/AccountSwitcherContext';
+import { BUSINESS_CREATION_ENABLED } from '@/lib/verticals-constants';
 import { cn } from '@/lib/utils';
 
 const VERTICAL_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -309,21 +310,23 @@ export default function AccountSwitcher({ className }: { className?: string }) {
           <div className="border-t border-slate-100 my-1" />
 
           {/* Action: Create a new Business Page */}
-          <div className="p-2">
-            <button
-              onClick={() => {
-                setIsOpen(false);
-                openCreateModal();
-              }}
-              className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-teal-800 hover:bg-teal-900 text-white text-xs font-bold transition-all shadow-sm group"
-            >
-              <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
-                <Plus className="w-4 h-4" />
-              </div>
-              <span>Create a Business Page</span>
-              <Sparkles className="w-3.5 h-3.5 ml-auto text-teal-200" />
-            </button>
-          </div>
+          {BUSINESS_CREATION_ENABLED && (
+            <div className="p-2">
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  openCreateModal();
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-teal-800 hover:bg-teal-900 text-white text-xs font-bold transition-all shadow-sm group"
+              >
+                <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center text-white group-hover:scale-105 transition-transform">
+                  <Plus className="w-4 h-4" />
+                </div>
+                <span>Create a Business Page</span>
+                <Sparkles className="w-3.5 h-3.5 ml-auto text-teal-200" />
+              </button>
+            </div>
+          )}
 
           <div className="border-t border-slate-100 my-1" />
 

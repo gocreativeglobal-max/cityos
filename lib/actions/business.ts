@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { db } from "@/src/prisma/db";
 import { provisionRestaurantOS } from "@/lib/actions/restaurantos";
 import { requireAuthenticatedAccount, requireMembership } from "@/lib/actions/tenant";
+import { BUSINESS_CREATION_ENABLED } from "@/lib/verticals-constants";
 
 // Registration default: when the onboarding form doesn't specify a city, the
 // organization lands in the first active city in the registry. Explicit
@@ -26,6 +27,9 @@ export async function registerOrganization(data: {
   citySlug?: string;
   address?: string;
 }) {
+  if (!BUSINESS_CREATION_ENABLED) {
+    return { error: "Business creation is temporarily paused during the pilot phase." };
+  }
   let person: any;
   try {
     const auth = await requireAuthenticatedAccount();
@@ -311,6 +315,10 @@ export async function quickCreateBusiness(data: {
   citySlug?: string;
   address?: string;
 }) {
+  if (!BUSINESS_CREATION_ENABLED) {
+    return { error: "Business creation is temporarily paused during the pilot phase." };
+  }
+
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.personId) {

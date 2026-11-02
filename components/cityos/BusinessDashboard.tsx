@@ -28,6 +28,7 @@ import {
   Truck,
 } from 'lucide-react';
 import { useAccountSwitcher } from '@/components/cityos/AccountSwitcherContext';
+import { BUSINESS_CREATION_ENABLED } from '@/lib/verticals-constants';
 import { cn } from '@/lib/utils';
 import { createOrgJob } from '@/lib/actions/business';
 import BranchManagerModal from '@/components/cityos/BranchManagerModal';
@@ -258,12 +259,14 @@ export default function BusinessDashboard() {
               Each business runs on its own dedicated vertical operating system (HotelOS, RestaurantOS, ShopOS, ServiceOS, SchoolOS).
             </p>
           </div>
-          <button
-            onClick={() => openCreateModal()}
-            className="inline-flex items-center gap-1 text-xs font-black text-teal-800 hover:text-teal-900 cursor-pointer shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5" /> Create Business Page
-          </button>
+          {BUSINESS_CREATION_ENABLED && (
+            <button
+              onClick={() => openCreateModal()}
+              className="inline-flex items-center gap-1 text-xs font-black text-teal-800 hover:text-teal-900 cursor-pointer shrink-0"
+            >
+              <Plus className="w-3.5 h-3.5" /> Create Business Page
+            </button>
+          )}
         </div>
 
         {myBusinesses.length === 0 ? (
@@ -272,12 +275,18 @@ export default function BusinessDashboard() {
             <p className="text-xs text-slate-400 mt-1 mb-4">
               Launch a retail shop, restaurant, service trade, school, hotel, or clinic with its own dedicated OS dashboard.
             </p>
-            <button
-              onClick={() => openCreateModal()}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-800 text-white text-xs font-black shadow-sm hover:bg-teal-900 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" /> Create a Business Page
-            </button>
+            {BUSINESS_CREATION_ENABLED ? (
+              <button
+                onClick={() => openCreateModal()}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-teal-800 text-white text-xs font-black shadow-sm hover:bg-teal-900 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> Create a Business Page
+              </button>
+            ) : (
+              <span className="inline-block px-3 py-1.5 rounded-lg bg-slate-100 text-slate-500 text-[11px] font-bold">
+                Business registration paused during pilot
+              </span>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">

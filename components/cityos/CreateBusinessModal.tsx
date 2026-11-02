@@ -19,6 +19,7 @@ import {
 import { useAccountSwitcher } from '@/components/cityos/AccountSwitcherContext';
 import { useSession } from 'next-auth/react';
 import { quickCreateBusiness } from '@/lib/actions/business';
+import { BUSINESS_CREATION_ENABLED } from '@/lib/verticals-constants';
 import { useCity } from '@/components/cityos/CityProvider';
 import { cn } from '@/lib/utils';
 
@@ -164,6 +165,36 @@ export default function CreateBusinessModal() {
   }, [isCreateModalOpen, preselectedType, city?.name]);
 
   if (!isCreateModalOpen) return null;
+
+  if (!BUSINESS_CREATION_ENABLED) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" onClick={closeCreateModal} />
+        <div className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden my-8 z-10 p-8 text-center animate-in zoom-in-95 duration-200">
+          <button
+            onClick={closeCreateModal}
+            className="absolute right-5 top-5 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+          <div className="w-16 h-16 rounded-2xl bg-amber-50 border border-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-4 text-2xl shadow-inner">
+            <Store className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 mb-2">Business Creation Paused</h2>
+          <p className="text-xs text-slate-500 font-medium leading-relaxed mb-6">
+            Self-serve business registration is temporarily paused during this stage of the pilot. Authorized stores are provisioned directly by the 9jaLive platform team.
+          </p>
+          <button
+            type="button"
+            onClick={closeCreateModal}
+            className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-all shadow-md cursor-pointer"
+          >
+            Continue Shopping
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!session?.user) {
     return (
