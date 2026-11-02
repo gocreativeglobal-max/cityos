@@ -453,7 +453,7 @@ export default function ResidentShell({
   const PRIMARY_NAV: NavItem[] = isShopOnly
     ? [
         { id: 'shop', path: '/', label: 'Shop', icon: Store, iconKey: 'shop', imageUrl: '/icons/portals/shop.png' },
-        { id: 'directory', path: '/directory', label: 'Stores & Malls', icon: Building2, iconKey: 'directory' },
+        { id: 'cart', path: '/checkout', label: 'Cart & Bag', icon: ShoppingCart, iconKey: 'cart' },
         { id: 'orders', path: '/orders', label: 'My Orders', icon: ShoppingBag, iconKey: 'orders' },
         { id: 'saved', path: '/saved', label: 'Saved Items', icon: Bookmark, iconKey: 'saved' },
         { id: 'profile', path: '/profile', label: 'Account', icon: UserIcon, iconKey: 'profile' },
@@ -915,9 +915,9 @@ export default function ResidentShell({
               {(isShopOnly
                 ? [
                     { id: 'shop', path: '/', label: 'Shop', icon: Store },
-                    { id: 'directory', path: '/directory', label: 'Stores', icon: Building2 },
                     { id: 'cart', path: '/checkout', label: 'Cart', icon: ShoppingCart },
                     { id: 'orders', path: '/orders', label: 'Orders', icon: ShoppingBag },
+                    { id: 'saved', path: '/saved', label: 'Saved', icon: Bookmark },
                     { id: 'profile', path: '/profile', label: 'Account', icon: UserIcon },
                   ]
                 : [
