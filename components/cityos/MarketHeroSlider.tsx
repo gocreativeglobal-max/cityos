@@ -34,6 +34,13 @@ export const DEFAULT_BANNER_SLIDES: BannerSlide[] = [
     alt: '9jaLive - Get It Today. Not Tomorrow. Shop from local stores and get your orders delivered the very same day.',
     targetSectionId: 'market-catalog-section',
   },
+  {
+    id: 'hero-tech-gadgets',
+    image: '/images/banners/hero-banner-3.jpg',
+    alt: '9jaLive - Stay Connected. Stay Ahead. Find the smartphones and accessories you need from nearby stores.',
+    categoryId: 'phones-iphones-tablets',
+    targetSectionId: 'market-catalog-section',
+  },
 ];
 
 export interface MarketHeroSliderProps {
