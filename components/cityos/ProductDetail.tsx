@@ -412,17 +412,6 @@ export default function ProductDetail({ id }: { id: string }) {
             </div>
           )}
 
-          {/* Trust Guarantees */}
-          <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3 text-[11px] font-semibold text-slate-600">
-            <div className="flex items-center gap-2 p-2 bg-emerald-50/60 rounded-lg border border-emerald-100/60">
-              <BadgeCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span className="text-emerald-950 font-bold">100% Genuine Guaranteed</span>
-            </div>
-            <div className="flex items-center gap-2 p-2 bg-slate-50 rounded-lg border border-slate-100">
-              <RotateCcw className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>7-Day Easy Returns</span>
-            </div>
-          </div>
 
           {/* Social Share Callout */}
           <div className="flex items-center justify-between text-xs text-slate-500 pt-2 px-1">
@@ -630,12 +619,12 @@ export default function ProductDetail({ id }: { id: string }) {
         {/* COLUMN 3 (3 cols): DELIVERY, RETURNS & SELLER INFORMATION */}
         <div className="lg:col-span-3 space-y-4">
           
-          {/* DELIVERY & RETURNS CARD */}
+          {/* DELIVERY & PICKUP CARD */}
           <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-xs space-y-3.5 text-xs">
             <div className="border-b border-slate-100 pb-2">
               <h3 className="font-black text-slate-900 uppercase tracking-wider text-xs flex items-center gap-1.5">
                 <Truck className="w-4 h-4 text-emerald-600" />
-                Delivery & Returns
+                Delivery & Pickup Options
               </h3>
               <p className="text-[11px] text-slate-500 mt-1 leading-normal">
                 The <strong className="text-slate-800">BEST</strong> products, delivered faster. Pay on Delivery, Cash or Bank Transfer Anywhere!
@@ -711,27 +700,6 @@ export default function ProductDetail({ id }: { id: string }) {
               </div>
             </div>
 
-            {/* Return Policy */}
-            <div className="flex items-start gap-2.5 pt-2 border-t border-slate-100 text-slate-600">
-              <RotateCcw className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold text-slate-900 block">Return Policy</span>
-                <p className="text-[11px] text-slate-500 leading-tight">
-                  Free return within <strong>7 days</strong> for all eligible items.
-                </p>
-              </div>
-            </div>
-
-            {/* Warranty */}
-            <div className="flex items-start gap-2.5 pt-2 border-t border-slate-100 text-slate-600">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-              <div>
-                <span className="font-bold text-slate-900 block">Warranty</span>
-                <p className="text-[11px] text-slate-500 leading-tight">
-                  1-Year Replacement Warranty on manufacturer defects.
-                </p>
-              </div>
-            </div>
           </div>
 
           {/* SELLER INFORMATION CARD */}
