@@ -223,11 +223,22 @@ export default function ProductDetail({ id }: { id: string }) {
     ? Math.round(((activeProduct.compareAtPrice - activeProduct.price) / activeProduct.compareAtPrice) * 100) 
     : 0;
 
-  const productImg = p.imageAssetId
-    ? p.imageAssetId.startsWith('http') || p.imageAssetId.startsWith('/')
+  const galleryImages: string[] = useMemo(() => {
+    if (!p?.imageAssetId) return [];
+    if (p.imageAssetId.startsWith('[')) {
+      try {
+        const parsed = JSON.parse(p.imageAssetId);
+        if (Array.isArray(parsed)) return parsed.filter(Boolean);
+      } catch {}
+    }
+    const single = p.imageAssetId.startsWith('http') || p.imageAssetId.startsWith('/')
       ? p.imageAssetId
-      : `/api/assets/${p.imageAssetId}`
-    : p.imageUrl || undefined;
+      : `/api/assets/${p.imageAssetId}`;
+    return [single];
+  }, [p?.imageAssetId]);
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const productImg = galleryImages[activeImageIndex] || galleryImages[0] || p?.imageUrl || undefined;
 
   const handleAdd = () => {
     if (isOutOfStock) return;
@@ -379,6 +390,27 @@ export default function ProductDetail({ id }: { id: string }) {
               <CityMismatchChip />
             </div>
           </div>
+
+          {/* Gallery Thumbnails */}
+          {galleryImages.length > 1 && (
+            <div className="flex items-center gap-2 pt-1 overflow-x-auto no-scrollbar">
+              {galleryImages.map((imgUrl, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={cn(
+                    "w-14 h-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 bg-slate-50 p-1",
+                    activeImageIndex === idx 
+                      ? "border-emerald-600 shadow-xs scale-105" 
+                      : "border-slate-200 hover:border-slate-300 opacity-70 hover:opacity-100"
+                  )}
+                >
+                  <img src={imgUrl} alt={`${p.name} angle ${idx + 1}`} className="w-full h-full object-contain" />
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Trust Guarantees */}
           <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3 text-[11px] font-semibold text-slate-600">

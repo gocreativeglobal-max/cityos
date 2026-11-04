@@ -42,10 +42,18 @@ export default function GlovoProductCard({
 }: GlovoProductCardProps) {
   const { fmt } = useMoney();
 
-  const productImg = product.imageAssetId
-    ? product.imageAssetId.startsWith('http') || product.imageAssetId.startsWith('/')
-      ? product.imageAssetId
-      : `/api/assets/${product.imageAssetId}`
+  let resolvedAssetId = product.imageAssetId;
+  if (resolvedAssetId?.startsWith('[')) {
+    try {
+      const parsed = JSON.parse(resolvedAssetId);
+      if (Array.isArray(parsed) && parsed[0]) resolvedAssetId = parsed[0];
+    } catch {}
+  }
+
+  const productImg = resolvedAssetId
+    ? resolvedAssetId.startsWith('http') || resolvedAssetId.startsWith('/')
+      ? resolvedAssetId
+      : `/api/assets/${resolvedAssetId}`
     : product.imageUrl || undefined;
 
   const isOutOfStock =
