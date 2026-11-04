@@ -17,7 +17,8 @@
     "test:isolated": "tsx --test-concurrency=1 --import ./lib/test-preload.ts --test lib/actions/logistics-calabar-*.test.ts",
     "social:login": "node scripts/instagram-login.mjs",
     "social:sync": "tsx scripts/instagram-sync.ts",
-    "images:s3": "node scripts/migrate-product-images.mjs"
+    "images:s3": "node scripts/migrate-product-images.mjs",
+    "products:purge": "node scripts/delete-all-products.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1136.0",
