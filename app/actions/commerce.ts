@@ -577,6 +577,11 @@ export async function getCityMartProduct(productId: string) {
   const p = await db.orm.public.RetailProduct.where({ id: productId }).all().first();
   if (!p) return null;
   const org = await db.orm.public.Organization.where({ id: p.organizationId }).all().first();
+  let categoryName: string | null = null;
+  if (p.categoryId) {
+    const cat = await db.orm.public.RetailCategory.where({ id: p.categoryId }).all().first();
+    categoryName = cat?.name ?? null;
+  }
 
   const activeCity = await getCurrentCity();
   let locs = await db.orm.public.Location.where({ organizationId: p.organizationId }).all();
@@ -628,6 +633,7 @@ export async function getCityMartProduct(productId: string) {
     citySlug: activeCity?.slug ?? null,
     relatedProducts,
     isVerified,
+    categoryName,
   };
 }
 
