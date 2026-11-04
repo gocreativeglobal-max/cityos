@@ -120,12 +120,26 @@ function parseProductDescription(text?: string | null): ParsedDetails {
   return { overview, keyFeatures, whatsInTheBox, specifications };
 }
 
-export default function ProductDetail({ id }: { id: string }) {
+export default function ProductDetail({ 
+  id,
+  initialProduct,
+  initialReviews,
+}: { 
+  id: string;
+  initialProduct?: any;
+  initialReviews?: any;
+}) {
   const { fmt } = useMoney();
   const router = useRouter();
-  const [p, setP] = useState<any>(null);
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [p, setP] = useState<any>(initialProduct || null);
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(() => {
+    if (initialProduct?.variants && initialProduct.variants.length > 0) {
+      const available = initialProduct.variants.find((v: any) => v.stockQuantity > 0 || initialProduct.isWeighed);
+      return (available || initialProduct.variants[0])?.id || null;
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(!initialProduct);
   const [error, setError] = useState(false);
   
   const { add } = useCart();
@@ -139,9 +153,9 @@ export default function ProductDetail({ id }: { id: string }) {
   // Real Database Reviews & Rating State
   const [reviewsData, setReviewsData] = useState<{
     reviews: any[];
-    distribution: { averageRating: number | null; totalReviews: number; counts: Record<number, number> };
+    distribution: { averageRating: number | null; totalReviews: number; counts: Record<number | string, number> };
     myReview: any | null;
-  }>({
+  }>(initialReviews || {
     reviews: [],
     distribution: { averageRating: null, totalReviews: 0, counts: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } },
     myReview: null,
@@ -169,19 +183,34 @@ export default function ProductDetail({ id }: { id: string }) {
   const reviewVibeTags = ['Authentic', 'Fast Delivery', 'Great Quality', 'Fair Pricing', 'Reliable', 'Highly Recommended'];
 
   useEffect(() => {
+    if (initialProduct) {
+      if (!reviewsData?.reviews?.length && initialProduct.organizationId) {
+        getProductReviewsBundle(initialProduct.organizationId).then((bundle) => {
+          if (bundle) setReviewsData(bundle as any);
+        }).catch(() => {});
+      }
+      return;
+    }
+
     async function load() {
       try {
         const prod = await getCityMartProduct(id);
+        if (!prod) {
+          setError(true);
+          return;
+        }
         setP(prod);
         if (prod && prod.variants && prod.variants.length > 0) {
           const available = prod.variants.find((v: any) => v.stockQuantity > 0 || prod.isWeighed);
-          setSelectedVariantId((available || prod.variants[0]).id as string);
+          setSelectedVariantId((available || prod.variants[0])?.id as string);
         }
 
         // Fetch live database reviews for this store/product
         if (prod?.organizationId) {
           const bundle = await getProductReviewsBundle(prod.organizationId);
-          setReviewsData(bundle as any);
+          if (bundle) {
+            setReviewsData(bundle as any);
+          }
         }
       } catch (e) {
         setError(true);
@@ -190,7 +219,7 @@ export default function ProductDetail({ id }: { id: string }) {
       }
     }
     load();
-  }, [id]);
+  }, [id, initialProduct]);
 
   const parsed = useMemo(() => parseProductDescription(p?.description), [p?.description]);
 
@@ -215,26 +244,29 @@ export default function ProductDetail({ id }: { id: string }) {
     );
   }
 
-  const hasVariants = p?.variants?.length > 0;
-  const activeProduct = hasVariants ? (p.variants.find((v: any) => v.id === selectedVariantId) || p.variants[0]) : p;
+  const hasVariants = Array.isArray(p?.variants) && p.variants.length > 0;
+  const activeProduct = (hasVariants ? (p.variants.find((v: any) => v.id === selectedVariantId) || p.variants[0]) : p) || {};
   
-  const isOutOfStock = !p.isWeighed && (activeProduct.stockQuantity == null || activeProduct.stockQuantity <= 0);
-  const discount = activeProduct.compareAtPrice && activeProduct.compareAtPrice > activeProduct.price 
+  const isOutOfStock = !p?.isWeighed && (activeProduct.stockQuantity == null || activeProduct.stockQuantity <= 0);
+  const discount = activeProduct.compareAtPrice && activeProduct.price && activeProduct.compareAtPrice > activeProduct.price 
     ? Math.round(((activeProduct.compareAtPrice - activeProduct.price) / activeProduct.compareAtPrice) * 100) 
     : 0;
 
   const galleryImages: string[] = useMemo(() => {
     if (!p?.imageAssetId) return [];
-    if (p.imageAssetId.startsWith('[')) {
+    if (typeof p.imageAssetId === 'string' && p.imageAssetId.startsWith('[')) {
       try {
         const parsed = JSON.parse(p.imageAssetId);
         if (Array.isArray(parsed)) return parsed.filter(Boolean);
       } catch {}
     }
-    const single = p.imageAssetId.startsWith('http') || p.imageAssetId.startsWith('/')
-      ? p.imageAssetId
-      : `/api/assets/${p.imageAssetId}`;
-    return [single];
+    if (typeof p.imageAssetId === 'string') {
+      const single = p.imageAssetId.startsWith('http') || p.imageAssetId.startsWith('/')
+        ? p.imageAssetId
+        : `/api/assets/${p.imageAssetId}`;
+      return [single];
+    }
+    return [];
   }, [p?.imageAssetId]);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -322,16 +354,20 @@ export default function ProductDetail({ id }: { id: string }) {
   })) : [];
 
   // Extract brand name from specs or product title
-  const brandName = parsed.specifications.find(s => s.key.toLowerCase().includes('brand'))?.value ||
-    (p.name.toLowerCase().includes('ldnio') ? 'LDNIO' : (p.name.toLowerCase().includes('nivea') ? 'NIVEA' : p.storeName));
+  const brandName = parsed.specifications.find(s => s.key && typeof s.key === 'string' && s.key.toLowerCase().includes('brand'))?.value ||
+    (p?.name && typeof p.name === 'string' && p.name.toLowerCase().includes('ldnio') ? 'LDNIO' : (p?.name && typeof p.name === 'string' && p.name.toLowerCase().includes('dell') ? 'DELL' : (p?.name && typeof p.name === 'string' && p.name.toLowerCase().includes('nivea') ? 'NIVEA' : (p?.storeName || 'Merchant'))));
 
   // Compute live database-backed ratings
-  const totalReviewsCount = reviewsData.distribution.totalReviews;
-  const avgRatingDisplay = reviewsData.distribution.averageRating !== null 
-    ? reviewsData.distribution.averageRating.toFixed(1)
-    : (totalReviewsCount > 0 ? '5.0' : '5.0');
+  const distribution = reviewsData?.distribution ?? { averageRating: null, totalReviews: 0, counts: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } };
+  const reviewsList = Array.isArray(reviewsData?.reviews) ? reviewsData.reviews : [];
+  const totalReviewsCount = Number(distribution.totalReviews) || reviewsList.length || 0;
+  const rawAvg = distribution.averageRating;
+  const avgRatingDisplay = typeof rawAvg === 'number'
+    ? rawAvg.toFixed(1)
+    : (typeof rawAvg === 'string' && !isNaN(Number(rawAvg)) ? Number(rawAvg).toFixed(1) : (totalReviewsCount > 0 ? '5.0' : '5.0'));
 
-  const ratingCounts = reviewsData.distribution.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  const ratingCounts: Record<string | number, number> = distribution.counts || { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+  const areasForCity = (selectedCity && cityAreas[selectedCity]) || cityAreas['Calabar'] || [];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 pb-28 pt-2 px-3 sm:px-4">
@@ -342,9 +378,9 @@ export default function ProductDetail({ id }: { id: string }) {
           <Link href="/" className="hover:text-emerald-700 transition-colors font-medium">Home</Link>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
           <Link href="/market" className="hover:text-emerald-700 transition-colors font-medium">
-            {p.globalCategory || 'Market Essentials'}
+            {p?.globalCategory || 'Market Essentials'}
           </Link>
-          {p.categoryName && (
+          {p?.categoryName && (
             <>
               <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
               <span className="hover:text-emerald-700 transition-colors font-medium cursor-pointer">
@@ -353,7 +389,7 @@ export default function ProductDetail({ id }: { id: string }) {
             </>
           )}
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-          <span className="text-slate-800 font-semibold truncate max-w-[200px] sm:max-w-xs">{p.name}</span>
+          <span className="text-slate-800 font-semibold truncate max-w-[200px] sm:max-w-xs">{p?.name}</span>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -364,7 +400,7 @@ export default function ProductDetail({ id }: { id: string }) {
             {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-slate-500" />}
             <span>{copiedLink ? 'Link Copied!' : 'Share'}</span>
           </button>
-          <SaveButton kind="product" entityId={p.id} />
+          {p?.id && <SaveButton kind="product" entityId={p.id} />}
         </div>
       </nav>
 
@@ -454,7 +490,7 @@ export default function ProductDetail({ id }: { id: string }) {
 
           {/* Title */}
           <h1 className="text-xl md:text-2xl font-bold text-slate-900 leading-snug">
-            {p.name}
+            {p?.name}
           </h1>
 
           {/* Brand & Store Line */}
@@ -462,8 +498,8 @@ export default function ProductDetail({ id }: { id: string }) {
             <span className="font-medium">Brand:</span>
             <span className="text-emerald-700 font-bold hover:underline cursor-pointer">{brandName}</span>
             <span className="text-slate-300">|</span>
-            <Link href={`/org/${p.organizationId}`} className="text-slate-700 hover:text-emerald-700 font-semibold transition-colors">
-              Similar products from {p.storeName}
+            <Link href={`/org/${p?.organizationId || ''}`} className="text-slate-700 hover:text-emerald-700 font-semibold transition-colors">
+              Similar products from {p?.storeName || 'Store'}
             </Link>
           </div>
 
@@ -646,7 +682,8 @@ export default function ProductDetail({ id }: { id: string }) {
                   onChange={(e) => {
                     const c = e.target.value as any;
                     setSelectedCity(c);
-                    setSelectedArea(cityAreas[c][0]);
+                    const defaultArea = (cityAreas[c] && cityAreas[c][0]) || 'City Center';
+                    setSelectedArea(defaultArea);
                   }}
                   className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-600"
                 >
@@ -661,7 +698,7 @@ export default function ProductDetail({ id }: { id: string }) {
                   onChange={(e) => setSelectedArea(e.target.value)}
                   className="bg-white border border-slate-200 rounded-lg p-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-600 truncate"
                 >
-                  {cityAreas[selectedCity].map((area) => (
+                  {areasForCity.map((area) => (
                     <option key={area} value={area}>{area}</option>
                   ))}
                 </select>
@@ -962,7 +999,7 @@ export default function ProductDetail({ id }: { id: string }) {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                    Comments from Verified Purchases ({reviewsData.reviews.length})
+                    Comments from Verified Purchases ({reviewsList.length})
                   </h4>
                   <button
                     onClick={() => setIsReviewModalOpen(true)}
@@ -973,7 +1010,7 @@ export default function ProductDetail({ id }: { id: string }) {
                   </button>
                 </div>
 
-                {reviewsData.reviews.length === 0 ? (
+                {reviewsList.length === 0 ? (
                   <div className="text-center py-10 bg-slate-50 rounded-xl border border-dashed border-slate-200 text-slate-500 space-y-2">
                     <Star className="w-8 h-8 mx-auto text-slate-300" />
                     <p className="text-xs font-semibold">No reviews yet for this product in the database.</p>
@@ -985,7 +1022,7 @@ export default function ProductDetail({ id }: { id: string }) {
                     </button>
                   </div>
                 ) : (
-                  reviewsData.reviews.map((rev: any, idx: number) => {
+                  reviewsList.map((rev: any, idx: number) => {
                     const formattedDate = new Date(rev.createdAt).toLocaleDateString('en-GB', {
                       day: '2-digit',
                       month: '2-digit',
@@ -1050,19 +1087,19 @@ export default function ProductDetail({ id }: { id: string }) {
       </div>
 
       {/* 4. MORE FROM STORE / RELATED PRODUCTS */}
-      {Array.isArray(p.relatedProducts) && p.relatedProducts.length > 0 && (
+      {Array.isArray(p?.relatedProducts) && p.relatedProducts.length > 0 && (
         <section className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-base font-bold text-slate-900 tracking-tight uppercase">
-                More from {p.storeName}
+                More from {p?.storeName || 'Store'}
               </h2>
               <p className="text-xs text-slate-500 font-medium">
                 Verified items available from this authorized merchant
               </p>
             </div>
             <Link
-              href={`/org/${p.organizationId}`}
+              href={`/org/${p?.organizationId || ''}`}
               className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
             >
               <span>See All</span>
