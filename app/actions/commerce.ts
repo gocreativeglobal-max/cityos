@@ -577,6 +577,8 @@ export async function getCityMartProduct(productId: string) {
   const p = await db.orm.public.RetailProduct.where({ id: productId }).all().first();
   if (!p) return null;
   const org = await db.orm.public.Organization.where({ id: p.organizationId }).all().first();
+  const { getOrganizationReviews } = await import('@/lib/actions/reviews');
+  const reviewBundle = await getOrganizationReviews(p.organizationId).catch(() => null);
   let categoryName: string | null = null;
   if (p.categoryId) {
     const cat = await db.orm.public.RetailCategory.where({ id: p.categoryId }).all().first();
@@ -634,6 +636,7 @@ export async function getCityMartProduct(productId: string) {
     relatedProducts,
     isVerified,
     categoryName,
+    reviewSummary: reviewBundle?.distribution ?? null,
   };
 }
 
@@ -662,4 +665,27 @@ export async function fetchMyOrders() {
   } catch (error) {
     return [];
   }
+}
+
+export async function getProductReviewsBundle(organizationId: string) {
+  try {
+    const { getOrganizationReviews } = await import('@/lib/actions/reviews');
+    return await getOrganizationReviews(organizationId);
+  } catch (err) {
+    return {
+      reviews: [],
+      distribution: { averageRating: null, totalReviews: 0, counts: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 } },
+      myReview: null,
+    };
+  }
+}
+
+export async function submitProductReviewAction(input: {
+  organizationId: string;
+  rating: number;
+  body?: string;
+  tags?: string[];
+}) {
+  const { submitBusinessReview } = await import('@/lib/actions/reviews');
+  return await submitBusinessReview(input);
 }
