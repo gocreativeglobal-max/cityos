@@ -377,15 +377,23 @@ export default function ProductDetail({
         <div className="flex items-center gap-1.5 flex-wrap truncate">
           <Link href="/" className="hover:text-emerald-700 transition-colors font-medium">Home</Link>
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-          <Link href="/market" className="hover:text-emerald-700 transition-colors font-medium">
+          <Link 
+            href={`/market?category=${encodeURIComponent((p?.globalCategory || 'all').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))}`} 
+            className="hover:text-emerald-700 transition-colors font-medium"
+            title={`View ${p?.globalCategory || 'Market Essentials'}`}
+          >
             {p?.globalCategory || 'Market Essentials'}
           </Link>
           {p?.categoryName && (
             <>
               <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />
-              <span className="hover:text-emerald-700 transition-colors font-medium cursor-pointer">
+              <Link 
+                href={`/market?category=${encodeURIComponent(p.categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))}`}
+                className="hover:text-emerald-700 transition-colors font-medium"
+                title={`View ${p.categoryName}`}
+              >
                 {p.categoryName}
-              </span>
+              </Link>
             </>
           )}
           <ChevronRight className="w-3 h-3 text-slate-400 shrink-0" />

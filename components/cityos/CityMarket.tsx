@@ -85,9 +85,17 @@ export default function CityMarket() {
   useEffect(() => {
     const brandParam = searchParams.get('brand');
     const qParam = searchParams.get('q') || searchParams.get('search');
+    const catParam = searchParams.get('category') || searchParams.get('aisle');
+
+    if (catParam) {
+      const slug = catParam.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      setActiveAisle(slug);
+    }
     const target = brandParam || qParam;
     if (target) {
       setSearchQuery(target);
+    }
+    if (target || catParam) {
       if (typeof window !== 'undefined') {
         setTimeout(() => {
           const el = document.getElementById('market-catalog-section');
@@ -98,6 +106,23 @@ export default function CityMarket() {
       }
     }
   }, [searchParams]);
+
+  const activeCategoryLabel = useMemo(() => {
+    if (activeAisle === 'all') return null;
+    const inBubbles = categories.find((c) => c.id === activeAisle)?.label;
+    if (inBubbles) return inBubbles;
+    const inProd = products.find((p) => {
+      const aCat = ((p as any).categoryName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const pCat = (p.globalCategory || p.category || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      return aCat === activeAisle || pCat === activeAisle;
+    });
+    if (inProd) {
+      const aCat = ((inProd as any).categoryName || '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      if (aCat === activeAisle) return (inProd as any).categoryName;
+      return inProd.globalCategory || (inProd as any).category;
+    }
+    return activeAisle.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  }, [activeAisle, categories, products]);
 
   const handleSelectAisle = (aisleId: string) => {
     setActiveAisle(aisleId);
@@ -401,7 +426,7 @@ export default function CityMarket() {
                 ? `Results for "${searchQuery}"`
                 : activeAisle === 'all'
                 ? `All Products in ${activeArea === 'all' ? cityName : activeArea}`
-                : `${categories.find((c) => c.id === activeAisle)?.label || 'Selected Category'}`}
+                : activeCategoryLabel || 'Selected Category'}
             </h2>
             <p className="text-xs text-slate-500 font-medium">
               {showSectionedView
