@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import {
   Store,
   ArrowRight,
@@ -79,6 +80,24 @@ export default function CityMarket() {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sortBy, setSortBy] = useState<'popular' | 'price-asc' | 'price-desc'>('popular');
   const [viewMode, setViewMode] = useState<'sections' | 'grid'>('sections');
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const brandParam = searchParams.get('brand');
+    const qParam = searchParams.get('q') || searchParams.get('search');
+    const target = brandParam || qParam;
+    if (target) {
+      setSearchQuery(target);
+      if (typeof window !== 'undefined') {
+        setTimeout(() => {
+          const el = document.getElementById('market-catalog-section');
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 150);
+      }
+    }
+  }, [searchParams]);
 
   const handleSelectAisle = (aisleId: string) => {
     setActiveAisle(aisleId);

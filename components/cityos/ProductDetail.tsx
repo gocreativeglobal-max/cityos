@@ -478,10 +478,12 @@ export default function ProductDetail({
           
           {/* Official Store & Deals Badges */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-sm">
-              <Store className="w-3 h-3 text-emerald-400" />
-              Official Store
-            </span>
+            {p?.isOfficialStore && (
+              <span className="inline-flex items-center gap-1 bg-slate-900 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-sm">
+                <Store className="w-3 h-3 text-emerald-400" />
+                Official Store
+              </span>
+            )}
             <span className="inline-flex items-center gap-1 bg-emerald-700 text-white text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-sm">
               <Zap className="w-3 h-3 text-emerald-200 fill-emerald-200" />
               Deals Made For You
@@ -494,12 +496,21 @@ export default function ProductDetail({
           </h1>
 
           {/* Brand & Store Line */}
-          <div className="text-xs text-slate-500 flex items-center gap-1 flex-wrap">
-            <span className="font-medium">Brand:</span>
-            <span className="text-emerald-700 font-bold hover:underline cursor-pointer">{brandName}</span>
+          <div className="text-xs text-slate-500 flex items-center gap-1.5 flex-wrap">
+            <span className="font-medium text-slate-600">Brand:</span>
+            <Link 
+              href={`/market?brand=${encodeURIComponent(brandName)}`}
+              className="text-emerald-700 font-bold hover:underline"
+              title={`View all products from ${brandName}`}
+            >
+              {brandName}
+            </Link>
             <span className="text-slate-300">|</span>
-            <Link href={`/org/${p?.organizationId || ''}`} className="text-slate-700 hover:text-emerald-700 font-semibold transition-colors">
-              Similar products from {p?.storeName || 'Store'}
+            <Link 
+              href={`/market?brand=${encodeURIComponent(brandName)}`} 
+              className="text-slate-700 hover:text-emerald-700 font-semibold transition-colors"
+            >
+              Similar products from {brandName}
             </Link>
           </div>
 
@@ -1109,6 +1120,34 @@ export default function ProductDetail({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
             {p.relatedProducts.map((rp: GlovoProductItem) => (
               <GlovoProductCard key={rp.id} product={rp} />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* 4B. MORE FROM BRAND SECTION */}
+      {Array.isArray(p?.brandProducts) && p.brandProducts.length > 0 && (
+        <section className="bg-white rounded-2xl border border-slate-200 p-5 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-bold text-slate-900 tracking-tight uppercase">
+                More from {brandName}
+              </h2>
+              <p className="text-xs text-slate-500 font-medium">
+                Explore genuine verified products from {brandName}
+              </p>
+            </div>
+            <Link
+              href={`/market?brand=${encodeURIComponent(brandName)}`}
+              className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+            >
+              <span>See All {brandName}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            {p.brandProducts.map((bp: GlovoProductItem) => (
+              <GlovoProductCard key={bp.id} product={bp} />
             ))}
           </div>
         </section>

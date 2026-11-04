@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { getVerticalsConfig } from '@/lib/actions/verticals-config';
 import VerticalPausedNotice from '@/components/cityos/VerticalPausedNotice';
 import CityMarket from '@/components/cityos/CityMarket';
@@ -8,5 +9,9 @@ export default async function MarketPage() {
     return <VerticalPausedNotice verticalName="Shop" verticalId="shops" />;
   }
 
-  return <CityMarket />;
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <CityMarket />
+    </Suspense>
+  );
 }

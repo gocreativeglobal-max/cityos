@@ -626,6 +626,55 @@ export async function getCityMartProduct(productId: string) {
     } catch {}
   }
   const isVerified = Boolean(meta?.isVerified);
+  const isOfficialStore = Boolean(meta?.isOfficialStore || (org as any)?.isOfficialStore || false);
+
+  // Extract brand name from specifications or title
+  let brandName: string | null = null;
+  if (p.description) {
+    const brandMatch = p.description.match(/(?:brand|manufacturer):\s*([^\n\r•]+)/i);
+    if (brandMatch) brandName = brandMatch[1].trim();
+  }
+  if (!brandName) {
+    const nameLower = p.name.toLowerCase();
+    if (nameLower.includes('ldnio')) brandName = 'LDNIO';
+    else if (nameLower.includes('dell')) brandName = 'DELL';
+    else if (nameLower.includes('nivea')) brandName = 'NIVEA';
+    else if (nameLower.includes('apple')) brandName = 'Apple';
+    else if (nameLower.includes('hp')) brandName = 'HP';
+    else if (nameLower.includes('samsung')) brandName = 'Samsung';
+    else if (nameLower.includes('lenovo')) brandName = 'Lenovo';
+  }
+
+  // Fetch other products from the same brand across the catalog
+  let brandProducts: any[] = [];
+  if (brandName) {
+    const allProdMatches = await db.orm.public.RetailProduct.all();
+    brandProducts = allProdMatches
+      .filter((bp: any) => 
+        bp.id !== p.id && 
+        !bp.parentId && 
+        (bp.isWeighed || (bp.stockQuantity ?? 0) > 0) &&
+        (bp.name.toLowerCase().includes(brandName.toLowerCase()) || 
+         (bp.description && bp.description.toLowerCase().includes(brandName.toLowerCase())))
+      )
+      .slice(0, 6)
+      .map((bp: any) => ({
+        id: bp.id,
+        name: bp.name,
+        price: bp.price,
+        description: bp.description,
+        imageAssetId: bp.imageAssetId,
+        imageUrl: (bp as any).imageUrl,
+        storeName: org?.name || 'Store',
+        orgSlug: bp.organizationId,
+        organizationId: bp.organizationId,
+        globalCategory: bp.globalCategory,
+        stockQuantity: bp.stockQuantity,
+        isWeighed: bp.isWeighed,
+        unit: bp.unit,
+        brand: brandName,
+      }));
+  }
 
   return {
     ...p,
@@ -634,7 +683,10 @@ export async function getCityMartProduct(productId: string) {
     orgSlug: org?.id,
     citySlug: activeCity?.slug ?? null,
     relatedProducts,
+    brandProducts,
+    brandName,
     isVerified,
+    isOfficialStore,
     categoryName,
     reviewSummary: reviewBundle?.distribution ?? null,
   };
