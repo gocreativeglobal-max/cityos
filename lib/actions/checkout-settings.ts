@@ -33,7 +33,7 @@ const DEFAULT_CHECKOUT_CONFIG: PlatformCheckoutConfig = {
   allowPayOnDelivery: false,
   requireDeliveryAddress: false,
   minOrderAmount: 0,
-  deliveryBaseFee: 800,
+  deliveryBaseFee: 1400,
   deliveryBaseDistanceKm: 2.0,
   deliveryPerKmRate: 150,
   freeDeliveryThreshold: 0,

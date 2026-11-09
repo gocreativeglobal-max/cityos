@@ -72,7 +72,7 @@ export async function getCheckoutDeliveryEstimate(params: {
     if (!pickupStabilized.isServiceable || !dropoffStabilized.isServiceable) {
       return {
         success: false,
-        deliveryFee: 800,
+        deliveryFee: 1400,
         distanceKm: null,
         durationMinutes: null,
         isServiceable: false,
@@ -91,7 +91,7 @@ export async function getCheckoutDeliveryEstimate(params: {
     if (!resolution.success || !resolution.distanceKm) {
       return {
         success: false,
-        deliveryFee: 800,
+        deliveryFee: 1400,
         distanceKm: null,
         durationMinutes: null,
         isServiceable: false,
@@ -117,7 +117,7 @@ export async function getCheckoutDeliveryEstimate(params: {
 
     // 3. Calabar Dynamic Hyperlocal Fare Formula (Configurable by Admin & Merchant):
     const config = await getCheckoutConfig();
-    const baseFare = typeof config.deliveryBaseFee === 'number' ? config.deliveryBaseFee : 800;
+    const baseFare = typeof config.deliveryBaseFee === 'number' ? config.deliveryBaseFee : 1400;
     const coveredKm = typeof config.deliveryBaseDistanceKm === 'number' ? config.deliveryBaseDistanceKm : 2.0;
     const perKmRate = typeof config.deliveryPerKmRate === 'number' ? config.deliveryPerKmRate : 150;
     const excessKm = Math.max(0, resolution.distanceKm - coveredKm);
@@ -157,7 +157,7 @@ export async function getCheckoutDeliveryEstimate(params: {
     console.warn('[getCheckoutDeliveryEstimate] Fallback triggered:', err.message);
     return {
       success: false,
-      deliveryFee: 800,
+      deliveryFee: 1400,
       distanceKm: null,
       durationMinutes: null,
       isServiceable: true,

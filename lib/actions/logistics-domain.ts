@@ -359,7 +359,7 @@ export class MockPartnerCourierAdapter {
   providerName = 'CityDrive Partner Express';
 
   async getQuote(req: any): Promise<any> {
-    const baseFee = 800;
+    const baseFee = 1400;
     const distanceEstimateKm = 6;
     const distanceFee = distanceEstimateKm * 180;
     const weightFee = (req.weightKg || 1) * 50;

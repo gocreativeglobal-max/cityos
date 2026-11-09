@@ -42,7 +42,7 @@ test('Checkout Delivery — Dynamic CityDrive Integration', async (t) => {
 
     assert.strictEqual(quote.success, true);
     assert.strictEqual(quote.isServiceable, true);
-    assert.ok(quote.deliveryFee >= 800, `Expected deliveryFee >= 800, got ${quote.deliveryFee}`);
+    assert.ok(quote.deliveryFee >= 1400, `Expected deliveryFee >= 1400, got ${quote.deliveryFee}`);
     assert.ok(quote.distanceKm != null && quote.distanceKm > 0);
     assert.ok(quote.durationMinutes != null && quote.durationMinutes > 0);
   });

@@ -427,10 +427,10 @@ export default function AdminCheckoutConfig({ initialConfig }: AdminCheckoutConf
                 type="number"
                 min="0"
                 step="50"
-                value={config.deliveryBaseFee ?? 800}
+                value={config.deliveryBaseFee ?? 1400}
                 onChange={(e) => setConfig({ ...config, deliveryBaseFee: Math.max(0, Number(e.target.value) || 0) })}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-4 py-3 text-xs font-bold text-white focus:outline-none focus:border-teal-500"
-                placeholder="800"
+                placeholder="1400"
               />
             </div>
             <p className="text-[11px] text-slate-500">
@@ -523,7 +523,7 @@ export default function AdminCheckoutConfig({ initialConfig }: AdminCheckoutConf
                 <p className="text-[10px] text-slate-500">e.g. Marian → State Housing</p>
               </div>
               <span className="text-sm font-black text-teal-400 font-mono">
-                ₦{(config.deliveryBaseFee ?? 800).toLocaleString()}
+                ₦{(config.deliveryBaseFee ?? 1400).toLocaleString()}
               </span>
             </div>
 
@@ -534,7 +534,7 @@ export default function AdminCheckoutConfig({ initialConfig }: AdminCheckoutConf
                 <p className="text-[10px] text-slate-500">e.g. Marian → Watt / Goldie</p>
               </div>
               <span className="text-sm font-black text-teal-400 font-mono">
-                ₦{Math.round((config.deliveryBaseFee ?? 800) + Math.max(0, 4.0 - (config.deliveryBaseDistanceKm ?? 2.0)) * (config.deliveryPerKmRate ?? 150)).toLocaleString()}
+                ₦{Math.round((config.deliveryBaseFee ?? 1400) + Math.max(0, 4.0 - (config.deliveryBaseDistanceKm ?? 2.0)) * (config.deliveryPerKmRate ?? 150)).toLocaleString()}
               </span>
             </div>
 
@@ -545,7 +545,7 @@ export default function AdminCheckoutConfig({ initialConfig }: AdminCheckoutConf
                 <p className="text-[10px] text-slate-500">e.g. Airport → 8 Miles</p>
               </div>
               <span className="text-sm font-black text-teal-400 font-mono">
-                ₦{Math.round((config.deliveryBaseFee ?? 800) + Math.max(0, 7.5 - (config.deliveryBaseDistanceKm ?? 2.0)) * (config.deliveryPerKmRate ?? 150)).toLocaleString()}
+                ₦{Math.round((config.deliveryBaseFee ?? 1400) + Math.max(0, 7.5 - (config.deliveryBaseDistanceKm ?? 2.0)) * (config.deliveryPerKmRate ?? 150)).toLocaleString()}
               </span>
             </div>
           </div>
