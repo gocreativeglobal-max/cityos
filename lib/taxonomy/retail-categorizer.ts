@@ -440,7 +440,10 @@ export function classifyRetailProduct(input: {
   }
 
   // 3. Apple iPads
-  if (/\b(ipad)\b/i.test(name)) {
+  if (
+    /\bipad\b/i.test(name) &&
+    !/\b(cable|cord|charger|adapter|case|cover|keyboard|stylus|pen|stand|screen|glass|film|protector|holder|mount|battery|power\s*bank|dock)\b/i.test(name)
+  ) {
     return {
       globalCategory: 'Phones, iPhones & Tablets',
       inStoreCategory: 'Apple iPads',
@@ -469,8 +472,21 @@ export function classifyRetailProduct(input: {
     };
   }
 
+  // 5b. Tablet Stylus Pens & Keyboard Cases
+  if (/\b(stylus\s*pen|active\s*stylus|keyboard\s*case)\b/i.test(name)) {
+    return {
+      globalCategory: 'Laptops, MacBooks & Monitors',
+      inStoreCategory: 'Tablet Keyboards & Stylus',
+      brand,
+      specTags,
+    };
+  }
+
   // 6. Apple iPhones (segmented by generation series for in-store aisles!)
-  if (/\b(iphone)\b/i.test(name) && !/\b(for\s+iphone|cable|screen|guard|battery|earpods|case|charger)\b/i.test(name)) {
+  if (
+    /\biphone\b/i.test(name) &&
+    !/\b(cable|cord|charger|adapter|screen|guard|glass|film|protector|battery|earpods|case|cover|holder|stand|tripod|mount|microphone|mic|collar|lavalier|audio|gadget|ring\s*light|fill\s*light)\b/i.test(name)
+  ) {
     let inStoreCategory = 'Apple iPhones';
     if (/\biphone\s*(17|16|air)/i.test(name)) {
       inStoreCategory = 'iPhone 16, 17 & Air Series';
@@ -483,6 +499,16 @@ export function classifyRetailProduct(input: {
       globalCategory: 'Phones, iPhones & Tablets',
       inStoreCategory,
       brand: 'Apple',
+      specTags,
+    };
+  }
+
+  // 6b. CCTV, Security & Smart Home Cameras (must precede generic 4G LTE networking)
+  if (/\b(cctv|security\s*camera|ip\s*camera|ptz\s*camera|surveillance|smart\s*camera|solar\s*camera)\b/i.test(name)) {
+    return {
+      globalCategory: 'Starlink, 4G MiFi & Networking',
+      inStoreCategory: 'CCTV, Security & Smart Home',
+      brand,
       specTags,
     };
   }
@@ -509,8 +535,9 @@ export function classifyRetailProduct(input: {
 
   // 9. Power Banks, Portable Power Stations, Solar & Inverters
   if (
-    wcCat.includes('power bank') ||
-    /\b(power\s*bank|powerbank|power\s*box|powerjet|powerpulse|powerpluse|power\s*go|traveler\s*\d+|toast\s*\d+|turbo\s*(ultra|\d+)|power\s*tank|power\s*station|inverter|solar|lithium\s*battery|tubular\s*battery|ecoflow|bluetti|ups|lifepo4|\d{4,6}\s*mah)\b/i.test(name)
+    !/\b(speaker|soundbar|subwoofer|jbl\s+charge|jbl\s+flip)\b/i.test(name) &&
+    (wcCat.includes('power bank') ||
+    /\b(power\s*bank|powerbank|power\s*box|powerjet|powerpulse|powerpluse|power\s*go|traveler\s*\d+|toast\s*\d+|turbo\s*(ultra|\d+)|power\s*tank|power\s*station|inverter|solar|lithium\s*battery|tubular\s*battery|ecoflow|bluetti|ups|lifepo4|\d{4,6}\s*mah)\b/i.test(name))
   ) {
     const isHeavyStation = /\b(power\s*tank|power\s*station|inverter|solar|1000wh|320wh|100000mah)\b/i.test(name);
     return {
@@ -528,7 +555,9 @@ export function classifyRetailProduct(input: {
     wcCat.includes('wireless headphone') ||
     wcCat.includes('talking wireless headset') ||
     wcCat.includes('wire earphone') ||
-    /\b(earbud|earphone|earpods|freepods|necklace|neckband|airbuds|headset|headphone|overear|boompop|halo\s*airy|shark\s*\d|riff\s*\d|conch)\b/i.test(name)
+    wcCat.includes('headphone') ||
+    wcCat.includes('headset') ||
+    /\b(earbuds?|earphones?|earpods|freepods|necklace|neckband|airbuds|headsets?|headphones?|over-?ear|on-?ear|in-?ear|tune\s*\d+|boompop|halo\s*airy|shark\s*\d|riff\s*\d|conch)\b/i.test(name)
   ) {
     return {
       globalCategory: 'Earbuds, AirPods & Headphones',
@@ -538,11 +567,31 @@ export function classifyRetailProduct(input: {
     };
   }
 
-  // 11. Microphones, Gimbals & Creator Audio/Video
-  if (/\b(microphone|mini\s*mic|dji\s*mic|hollyland|maono|boya|rode|xlr|wireless\s*mic|selfie\s*stick|tripod|gimbal|quadrapod)\b/i.test(name)) {
+  // 11. Microphones & Creator Audio
+  if (/\b(microphone|mini\s*mic|dji\s*mic|hollyland|maono|boya|rode|xlr|wireless\s*mic|lavalier|lapel\s*mic|collar\s*mic)\b/i.test(name)) {
     return {
       globalCategory: 'Bluetooth Speakers & Creator Microphones',
       inStoreCategory: 'Microphones & Creator Audio',
+      brand,
+      specTags,
+    };
+  }
+
+  // 11b. Video & Studio Lighting / Fill Lights (evaluated before stands/tripods as lighting kits often include tripods)
+  if (/\b(fill\s*light|video\s*light|pocket\s*video|ring\s*light|light\s*kit|led\s*light|led\s*fill|varicolor|softbox|pro\s*led)\b/i.test(name)) {
+    return {
+      globalCategory: 'Bluetooth Speakers & Creator Microphones',
+      inStoreCategory: 'Webcams, Stands & Smart Gadgets',
+      brand,
+      specTags,
+    };
+  }
+
+  // 11c. Selfie Sticks, Tripods, Gimbals & Device Stands
+  if (/\b(selfie\s*stick|tripod|monopod|quadrapod|gimbal|stabilizer|selfie\s*screen|phone\s*stand|tablet\s*stand|desktop\s*stand|live\s*broadcast\s*stand|metal\s*stand|desktop\s*table\s*stand)\b/i.test(name)) {
+    return {
+      globalCategory: 'Phone & Tablet Stands',
+      inStoreCategory: 'Phone & Tablet Stands',
       brand,
       specTags,
     };
@@ -604,28 +653,24 @@ export function classifyRetailProduct(input: {
     };
   }
 
-  // 16a. Clippers, Trimmers, Shavers & Smart Gadgets
+  // 16. Laptops & Desktops (evaluated on name to avoid descriptions mentioning 'compatible with laptops')
   if (
-    wcCat.includes('clipper') ||
-    /\b(clipper|trimmer|shaver|smart\s*kettle|webcam|life\s*cam|smart\s*glasses|smart\s*socket|laptop\s*stand|adapter|mouse|keyboard|docking)\b/i.test(text)
+    !/\b(laptop\s*stand|laptop\s*bag|laptop\s*case|laptop\s*sleeve|cooler|cooling\s*pad|stand|holder|bracket|adapter|charger|docking|cable|keyboard\s*case|cover)\b/i.test(name) &&
+    /\b(laptop|notebook|ultrabook|elitebook|probook|pavilion|envy|omen|zbook|spectre|latitude|inspiron|xps|precision|alienware|vostro|thinkpad|ideapad|yoga|legion|zenbook|vivobook|aspire|predator|nitro|desktop\s*computer|all-in-one\s*pc)\b/i.test(name)
   ) {
     return {
-      globalCategory: 'Gaming Consoles, Storage & Smart Gadgets',
-      inStoreCategory: /\b(clipper|trimmer|shaver|smart\s*kettle)\b/i.test(name)
-        ? 'Clippers & Smart Appliances'
-        : 'Webcams, Stands & Smart Gadgets',
+      globalCategory: 'Laptops, MacBooks & Monitors',
+      inStoreCategory: 'Laptops & Computers',
       brand,
       specTags,
     };
   }
 
-  // 16b. Home & Kitchen Heavy Appliances
-  if (
-    /\b(refrigerator|fridge|freezer|washing\s*machine|microwave|blender|air\s*fryer|air\s*conditioner|standing\s*fan|smart\s*tv|television|sofa|mattress)\b/i.test(text)
-  ) {
+  // 16b. TV & Streaming Media Players
+  if (/\b(fire\s*tv|tv\s*stick|tv\s*box|streaming\s*box|streaming\s*media|media\s*player|chromecast|apple\s*tv)\b/i.test(name)) {
     return {
       globalCategory: 'Home, Kitchen & Appliances',
-      inStoreCategory: 'Home & Kitchen Appliances',
+      inStoreCategory: 'TV, Streaming & Home Entertainment',
       brand,
       specTags,
     };
@@ -641,11 +686,39 @@ export function classifyRetailProduct(input: {
     };
   }
 
-  // 18. Laptops & Desktops
-  if (/\b(laptop|notebook|ultrabook|elitebook|probook|pavilion|envy|omen|zbook|spectre|latitude|inspiron|xps|precision|alienware|vostro|thinkpad|ideapad|yoga|legion|zenbook|vivobook|aspire|predator|nitro|desktop\s*computer|core\s*i[3579])\b/i.test(text)) {
+  // 18a. Clippers, Trimmers, Shavers & Smart Gadgets
+  if (
+    wcCat.includes('clipper') ||
+    /\b(clipper|trimmer|shaver|smart\s*kettle)\b/i.test(name) ||
+    /\b(webcam|life\s*cam|smart\s*glasses|smart\s*socket|docking\s*station|usb\s*hub|mouse|keyboard)\b/i.test(name)
+  ) {
     return {
-      globalCategory: 'Laptops, MacBooks & Monitors',
-      inStoreCategory: 'Laptops & Computers',
+      globalCategory: 'Gaming Consoles, Storage & Smart Gadgets',
+      inStoreCategory: /\b(clipper|trimmer|shaver|smart\s*kettle)\b/i.test(name)
+        ? 'Clippers & Smart Appliances'
+        : 'Webcams, Stands & Smart Gadgets',
+      brand,
+      specTags,
+    };
+  }
+
+  // 18b. Personal Wellness & Massage
+  if (/\b(fascial\s*gun|massage\s*gun|massager|muscle\s*relaxer)\b/i.test(name)) {
+    return {
+      globalCategory: 'Health, Beauty & Personal Care',
+      inStoreCategory: 'Massage & Personal Wellness',
+      brand,
+      specTags,
+    };
+  }
+
+  // 18c. Home & Kitchen Heavy Appliances
+  if (
+    /\b(refrigerator|fridge|freezer|washing\s*machine|microwave|blender|air\s*fryer|air\s*conditioner|standing\s*fan|smart\s*tv|television|sofa|mattress)\b/i.test(text)
+  ) {
+    return {
+      globalCategory: 'Home, Kitchen & Appliances',
+      inStoreCategory: 'Home & Kitchen Appliances',
       brand,
       specTags,
     };
@@ -665,7 +738,7 @@ export function classifyRetailProduct(input: {
   }
 
   // 20. Universal E-Commerce Categories (Groceries, Fashion, Beauty, Baby, Sports, Auto)
-  if (/\b(rice|noodles|spaghetti|pasta|vegetable\s*oil|palm\s*oil|milk|milo|cereal|biscuit|beverage|juice|bread|grocery|provisions|detergent|tissue)\b/i.test(text)) {
+  if (/\b(rice|noodles|spaghetti|pasta|vegetable\s*oil|palm\s*oil|milk|milo|cereal|biscuit|beverage|juice|bread|grocery|provisions|detergent|toilet\s*tissue|facial\s*tissue|tissue\s*paper|serviette)\b/i.test(text)) {
     return {
       globalCategory: 'Supermarket & Groceries',
       inStoreCategory: 'Supermarket & Groceries',

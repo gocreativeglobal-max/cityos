@@ -37,7 +37,7 @@ export async function getCanonicalOrganization(id: string) {
         ...p,
         storeName: org.name,
         categoryName: explicitAisle || classified.inStoreCategory || p.globalCategory || 'General Goods',
-        globalCategory: classified.globalCategory || p.globalCategory || 'General Goods',
+        globalCategory: (p.globalCategory && p.globalCategory !== 'General Goods') ? p.globalCategory : (classified.globalCategory || 'General Goods'),
         brand: classified.brand,
         specTags: classified.specTags,
       };
@@ -47,12 +47,12 @@ export async function getCanonicalOrganization(id: string) {
   const recentOrgPosts = JSON.parse(JSON.stringify(rawOrgPosts)).filter((p: any) => p.linkedEntityType !== 'REVIEW' && p.category !== 'Review').sort((a: any, b: any) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()).slice(0, 6);
   const memberships = await db.orm.public.Membership.where({ organizationId: org.id }).all();
   const contactPoints = await db.orm.public.OrganizationContactPoint.where({ organizationId: org.id }).all();
-  const isClaimed = memberships.length > 0;
   const listing = await db.orm.public.DiscoveryListing.where({ organizationId: org.id }).first();
   let meta: any = {};
   try {
     if (listing?.metadata) meta = JSON.parse(listing.metadata);
   } catch {}
+  const isClaimed = memberships.length > 0 || Boolean(meta.claimed) || Boolean(meta.isClaimed);
   const cover = org.logoAssetId || listing?.coverAssetId || meta.coverImage || meta.images?.[0] || null;
 
   return {

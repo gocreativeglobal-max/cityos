@@ -362,7 +362,7 @@ export async function getCityMartProducts(citySlug?: string, cat: string = 'All'
       const area = org?.address ? org.address.split(',')[0].trim() : city.name;
       return {
         ...p,
-        globalCategory: classified.globalCategory,
+        globalCategory: (p.globalCategory && p.globalCategory !== 'General Goods') ? p.globalCategory : classified.globalCategory,
         categoryName: explicitAisle || classified.inStoreCategory,
         brand: classified.brand,
         specTags: classified.specTags,
