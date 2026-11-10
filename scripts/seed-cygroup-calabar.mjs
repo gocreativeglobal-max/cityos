@@ -26,14 +26,25 @@ function decodeHtmlEntities(str) {
 }
 
 async function main() {
+  if (!fs.existsSync('scripts/cygroup-products.json')) {
+    throw new Error('scripts/cygroup-products.json does not exist. Run extract-cygroup.mjs first.');
+  }
+
   const rawProducts = JSON.parse(
     fs.readFileSync('scripts/cygroup-products.json', 'utf8')
   );
 
+  console.log(`Loaded ${rawProducts.length} raw products from scripts/cygroup-products.json`);
+
   const usedFinalNames = new Set();
-  const finalItems = [];
+  const availableItems = [];
 
   for (const p of rawProducts) {
+    // Only import in-stock / available products
+    if (p.is_in_stock === false) {
+      continue;
+    }
+
     let baseName = decodeHtmlEntities(p.name)
       .replace(/\s*\.\.\.\s*$/, '')
       .trim();
@@ -50,8 +61,8 @@ async function main() {
     const compareAtPrice = regularPrice > price ? regularPrice : null;
 
     const img = p.images?.[0]?.src || null;
+    const allImages = (p.images || []).map(i => i.src).filter(Boolean);
     const wcCat = (p.categories || []).map((c) => c.name).join(' > ');
-    const inStock = p.is_in_stock !== false;
 
     let title = baseName;
     if (usedFinalNames.has(title.toLowerCase())) {
@@ -59,18 +70,20 @@ async function main() {
     }
     usedFinalNames.add(title.toLowerCase());
 
-    finalItems.push({
+    availableItems.push({
       wcId: p.id,
       title,
       desc: desc || `${title} available at Cy.com Phone Accessories Calabar.`,
       price,
       compareAtPrice,
       img,
+      allImages: allImages.length > 0 ? allImages : (img ? [img] : []),
       wcCat,
-      inStock,
       permalink: p.permalink,
     });
   }
+
+  console.log(`Filtered ${availableItems.length} available (in-stock) products for Cy.com Phone Accessories.`);
 
   const pool = new Pool({ connectionString: process.env.DATABASE_URL });
   const client = await pool.connect();
@@ -100,25 +113,25 @@ async function main() {
 
     await client.query('BEGIN');
 
-    // 1. Find Calabar city
+    // 1. Calabar City
     const cityRes = await client.query(
       `SELECT id, name, slug FROM ${T_CITY} WHERE LOWER(slug) = 'calabar' OR LOWER(name) = 'calabar' LIMIT 1`
     );
     const cityId = cityRes.rows[0].id;
 
-    // 2. Upsert Organization: Cy.com Phone Accessories
+    // 2. Organization: Cy.com Phone Accessories
     const orgId = 'cygroup-calabar';
     const orgName = 'Cy.com Phone Accessories';
     const orgAddress = 'Shop 268 Etim Edem Park (Opp. Cultural Centre) & Shop 8 Tonimas Plaza, Etta Agbor Road, Calabar';
     const orgDesc =
-      "Calabar's premier distributor of phone accessories, power banks (Oraimo, New Age, itel), fast chargers, wireless earbuds, Bluetooth speakers, smartwatches, memory cards, and phone replacement parts at wholesale and retail prices.";
+      "Calabar's premier distributor of phone accessories, original power banks (oraimo, New Age, itel), superfast chargers, wireless earbuds, Bluetooth speakers, smartwatches, memory cards, and phone replacement parts at wholesale & retail prices.";
     const orgLogo = 'https://cygroup.ng/wp-content/uploads/2022/09/cropped-20220912_0335085.png';
     const coverImg = 'https://cygroup.ng/wp-content/uploads/2026/09/1-22.jpg';
     const storeCategory = 'Phones, Apple & Devices';
 
-    // Pre-compute aisles
+    // Pre-compute aisles & classification
     const aisleSummary = new Map();
-    for (const item of finalItems) {
+    for (const item of availableItems) {
       const classified = classifyRetailProduct({
         name: item.title,
         description: item.desc,
@@ -133,7 +146,7 @@ async function main() {
     const topAisles = Array.from(aisleSummary.entries())
       .sort((a, b) => b[1] - a[1])
       .map(([name]) => name)
-      .slice(0, 8);
+      .slice(0, 10);
 
     const existingOrg = await client.query(`SELECT id FROM ${T_ORG} WHERE id = $1 LIMIT 1`, [orgId]);
     if (existingOrg.rows.length > 0) {
@@ -157,56 +170,93 @@ async function main() {
       );
     }
 
-    // 3. Upsert Primary Location in Calabar
-    let locRes = await client.query(`SELECT id FROM ${T_LOC} WHERE "organizationId" = $1 LIMIT 1`, [orgId]);
-    let locationId;
-    if (locRes.rows.length > 0) {
-      locationId = locRes.rows[0].id;
+    // 3. Upsert Physical Store Locations in Calabar
+    // Store 1: Etim Edem Park Branch (Primary)
+    const loc1Address = 'Shop 268 Etim Edem Park, Opposite Cultural Center, Calabar, Cross River State';
+    let loc1Res = await client.query(
+      `SELECT id FROM ${T_LOC} WHERE "organizationId" = $1 AND name LIKE '%Etim Edem%' LIMIT 1`,
+      [orgId]
+    );
+    let location1Id;
+    if (loc1Res.rows.length > 0) {
+      location1Id = loc1Res.rows[0].id;
       await client.query(
         `UPDATE ${T_LOC}
-         SET name = 'Cy.com Calabar Main Hub (Etim Edem / Ettagbor)',
+         SET name = 'Cy.com Store 1 (Etim Edem Park)',
              address = $2,
              "cityId" = $3,
              latitude = 4.9548,
              longitude = 8.3265
          WHERE id = $1`,
-        [locationId, orgAddress, cityId]
+        [location1Id, loc1Address, cityId]
       );
     } else {
-      locationId = crypto.randomUUID();
+      location1Id = crypto.randomUUID();
       await client.query(
         `INSERT INTO ${T_LOC} (id, "organizationId", name, address, "cityId", latitude, longitude)
-         VALUES ($1, $2, 'Cy.com Calabar Main Hub (Etim Edem / Ettagbor)', $3, $4, 4.9548, 8.3265)`,
-        [locationId, orgId, orgAddress, cityId]
+         VALUES ($1, $2, 'Cy.com Store 1 (Etim Edem Park)', $3, $4, 4.9548, 8.3265)`,
+        [location1Id, orgId, loc1Address, cityId]
       );
     }
 
-    // 4. Upsert WhatsApp Contact Point (+2348065373747)
+    // Store 2: Etta Agbor Branch
+    const loc2Address = 'Shop 8 Tonimas Plaza, Opposite Peace Mass Transit, Etta Agbor Road, Calabar, Cross River State';
+    let loc2Res = await client.query(
+      `SELECT id FROM ${T_LOC} WHERE "organizationId" = $1 AND name LIKE '%Etta Agbor%' LIMIT 1`,
+      [orgId]
+    );
+    let location2Id;
+    if (loc2Res.rows.length > 0) {
+      location2Id = loc2Res.rows[0].id;
+      await client.query(
+        `UPDATE ${T_LOC}
+         SET name = 'Cy.com Store 2 (Etta Agbor Road)',
+             address = $2,
+             "cityId" = $3,
+             latitude = 4.9532,
+             longitude = 8.3385
+         WHERE id = $1`,
+        [location2Id, loc2Address, cityId]
+      );
+    } else {
+      location2Id = crypto.randomUUID();
+      await client.query(
+        `INSERT INTO ${T_LOC} (id, "organizationId", name, address, "cityId", latitude, longitude)
+         VALUES ($1, $2, 'Cy.com Store 2 (Etta Agbor Road)', $3, $4, 4.9532, 8.3385)`,
+        [location2Id, orgId, loc2Address, cityId]
+      );
+    }
+
+    // 4. Upsert Verified WhatsApp & Phone Contact Points
+    const phonePrimary = '2348067154233';
     const waRes = await client.query(
       `SELECT id FROM ${T_CONTACT} WHERE "organizationId" = $1 AND type = 'WHATSAPP' LIMIT 1`,
       [orgId]
     );
     if (waRes.rows.length > 0) {
       await client.query(
-        `UPDATE ${T_CONTACT} SET value = '2348065373747', "isPrimary" = true, "isVerified" = true WHERE id = $1`,
-        [waRes.rows[0].id]
+        `UPDATE ${T_CONTACT} SET value = $2, "isPrimary" = true, "isVerified" = true WHERE id = $1`,
+        [waRes.rows[0].id, phonePrimary]
       );
     } else {
       await client.query(
         `INSERT INTO ${T_CONTACT} (id, "organizationId", type, value, "isPrimary", "isVerified")
-         VALUES ($1, $2, 'WHATSAPP', '2348065373747', true, true)`,
-        [crypto.randomUUID(), orgId]
+         VALUES ($1, $2, 'WHATSAPP', $3, true, true)`,
+        [crypto.randomUUID(), orgId, phonePrimary]
       );
     }
 
     // 5. Upsert DiscoveryListing
     const listingMetadata = JSON.stringify({
-      isVerified: false,
-      neighborhood: 'Ettagbor',
-      area: 'Ettagbor',
+      claimed: true,
+      verified: true,
+      isVerified: true,
+      neighborhood: 'Etim Edem & Etta Agbor',
+      area: 'Calabar Municipal',
       workingHours: 'Mon – Sat · 08:00 AM – 07:00 PM',
       websiteUrl: 'https://cygroup.ng/',
-      whatsappPhone: '2348065373747',
+      phone: '08067154233',
+      whatsappPhone: phonePrimary,
       logoUrl: orgLogo,
       coverImage: coverImg,
       images: [
@@ -215,6 +265,18 @@ async function main() {
         'https://cygroup.ng/wp-content/uploads/2026/08/1-16.jpg',
       ],
       aisles: topAisles,
+      branches: [
+        {
+          name: 'Store 1 (Etim Edem Park)',
+          address: loc1Address,
+          phone: '+2348067154233'
+        },
+        {
+          name: 'Store 2 (Etta Agbor Road)',
+          address: loc2Address,
+          phone: '+2347038323998'
+        }
+      ]
     });
 
     const listRes = await client.query(`SELECT id FROM ${T_LISTING} WHERE "organizationId" = $1 LIMIT 1`, [orgId]);
@@ -231,13 +293,13 @@ async function main() {
              "isActive" = true,
              metadata = $7
          WHERE id = $1`,
-        [listRes.rows[0].id, locationId, cityId, orgName, orgDesc, coverImg, listingMetadata]
+        [listRes.rows[0].id, location1Id, cityId, orgName, orgDesc, coverImg, listingMetadata]
       );
     } else {
       await client.query(
         `INSERT INTO ${T_LISTING} (id, "organizationId", "locationId", "cityId", vertical, slug, title, description, "coverAssetId", "isActive", metadata)
          VALUES ($1, $2, $3, $4, 'RETAIL', 'cygroup-calabar', $5, $6, $7, true, $8)`,
-        [crypto.randomUUID(), orgId, locationId, cityId, orgName, orgDesc, coverImg, listingMetadata]
+        [crypto.randomUUID(), orgId, location1Id, cityId, orgName, orgDesc, coverImg, listingMetadata]
       );
     }
 
@@ -249,17 +311,22 @@ async function main() {
          VALUES ($1, $2, $3, $4, '₦', 'NG', true, true)`,
         [crypto.randomUUID(), orgId, orgName, orgAddress]
       );
+    } else {
+      await client.query(
+        `UPDATE ${T_SETTINGS} SET "hasProducts" = true, "storeName" = $2 WHERE "organizationId" = $1`,
+        [orgId, orgName]
+      );
     }
 
-    // 7. Clear existing products/categories for cygroup-calabar & insert all 278 products
+    // 7. Clear existing products/categories for cygroup-calabar & insert all available in-stock products
     await client.query(`DELETE FROM ${T_STOCK} WHERE "organizationId" = $1`, [orgId]);
     await client.query(`DELETE FROM ${T_PRODUCT} WHERE "organizationId" = $1`, [orgId]);
     await client.query(`DELETE FROM ${T_CATEGORY} WHERE "organizationId" = $1`, [orgId]);
 
     const categoryMap = new Map();
 
-    for (let i = 0; i < finalItems.length; i++) {
-      const item = finalItems[i];
+    for (let i = 0; i < availableItems.length; i++) {
+      const item = availableItems[i];
       const classified = item.classified;
 
       let categoryId = categoryMap.get(classified.inStoreCategory);
@@ -275,14 +342,15 @@ async function main() {
 
       const productId = `cygroup-cal-${item.wcId}`;
       const sku = `CYG-${String(i + 1).padStart(3, '0')}`;
-      const stockQty = item.inStock ? 15 : 0;
+      const stockQty = 15;
+      const imagesJson = JSON.stringify(item.allImages);
 
       await client.query(
         `INSERT INTO ${T_PRODUCT} (
-          id, "organizationId", name, description, sku, price, "compareAtPrice",
+          id, "organizationId", name, description, sku, price, cost, "compareAtPrice",
           "stockQuantity", "lowStockLevel", "isWeighed", unit, "imageAssetId",
           "globalCategory", "categoryId"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 2, false, 'ea', $9, $10, $11)`,
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, 2, false, 'ea', $10, $11, $12)`,
         [
           productId,
           orgId,
@@ -290,24 +358,34 @@ async function main() {
           item.desc,
           sku,
           item.price,
+          item.price, // 0% markup
           item.compareAtPrice,
           stockQty,
-          item.img,
+          imagesJson,
           classified.globalCategory,
           categoryId,
         ]
       );
 
+      // Stock at Primary Location 1 (Etim Edem Park)
       await client.query(
         `INSERT INTO ${T_STOCK} (id, "organizationId", "locationId", "productId", "stockQuantity", "lowStockLevel")
          VALUES ($1, $2, $3, $4, $5, 2)`,
-        [crypto.randomUUID(), orgId, locationId, productId, stockQty]
+        [crypto.randomUUID(), orgId, location1Id, productId, 10]
+      );
+
+      // Stock at Branch Location 2 (Etta Agbor)
+      await client.query(
+        `INSERT INTO ${T_STOCK} (id, "organizationId", "locationId", "productId", "stockQuantity", "lowStockLevel")
+         VALUES ($1, $2, $3, $4, $5, 2)`,
+        [crypto.randomUUID(), orgId, location2Id, productId, 5]
       );
     }
 
     await client.query('COMMIT');
-    console.log(`\n🎉 Successfully seeded ${finalItems.length} products for ${orgName} (${orgId})!`);
+    console.log(`\n🎉 Successfully seeded ${availableItems.length} available products for ${orgName} (${orgId})!`);
     console.log(`   Store Sector: ${storeCategory}`);
+    console.log(`   Locations Seeded: 2 (Etim Edem Park & Etta Agbor)`);
     console.log(`   In-Store Aisles (${aisleSummary.size}):`);
     for (const [aisle, count] of Array.from(aisleSummary.entries()).sort((a, b) => b[1] - a[1])) {
       console.log(`     - ${aisle}: ${count} item(s)`);
