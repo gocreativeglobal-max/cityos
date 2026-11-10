@@ -12,14 +12,12 @@ import {
   Check,
   Eye,
   X,
-  Sparkles,
 } from 'lucide-react';
 import {
   RecentlyViewedItem,
   getRecentlyViewedProducts,
   clearRecentlyViewedProducts,
   removeRecentlyViewedProduct,
-  INITIAL_POPULAR_FALLBACKS,
 } from '@/lib/recently-viewed';
 import { FallbackImg } from '@/components/cityos/CityUI';
 import { useMoney } from '@/components/cityos/CityProvider';
@@ -46,7 +44,6 @@ export default function RecentlyViewedSection({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const [items, setItems] = useState<RecentlyViewedItem[]>([]);
-  const [isUsingFallback, setIsUsingFallback] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [addedIds, setAddedIds] = useState<Record<string, boolean>>({});
   const [isSeeAllOpen, setIsSeeAllOpen] = useState(false);
@@ -60,18 +57,7 @@ export default function RecentlyViewedSection({
       if (currentProductId) {
         stored = stored.filter((item) => item.id !== currentProductId);
       }
-
-      if (stored.length > 0) {
-        setItems(stored.slice(0, maxItems));
-        setIsUsingFallback(false);
-      } else {
-        // Show initial popular Jumia-style items as curated preview
-        const fallbacks = currentProductId
-          ? INITIAL_POPULAR_FALLBACKS.filter((f) => f.id !== currentProductId)
-          : INITIAL_POPULAR_FALLBACKS;
-        setItems(fallbacks);
-        setIsUsingFallback(true);
-      }
+      setItems(stored.slice(0, maxItems));
     };
 
     loadItems();
@@ -120,8 +106,7 @@ export default function RecentlyViewedSection({
   const handleClear = () => {
     if (confirm('Clear your recently viewed items?')) {
       clearRecentlyViewedProducts();
-      setItems(INITIAL_POPULAR_FALLBACKS);
-      setIsUsingFallback(true);
+      setItems([]);
     }
   };
 
@@ -145,18 +130,11 @@ export default function RecentlyViewedSection({
             <Clock className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm md:text-base font-black text-slate-900 tracking-tight">
-                {title}
-              </h2>
-              {isUsingFallback && (
-                <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded-full">
-                  <Sparkles className="w-2.5 h-2.5" /> Popular
-                </span>
-              )}
-            </div>
+            <h2 className="text-sm md:text-base font-black text-slate-900 tracking-tight">
+              {title}
+            </h2>
             <p className="text-[11px] text-slate-500 font-medium hidden sm:block">
-              {isUsingFallback ? 'Top viewed products in Calabar' : 'Based on your browsing history'}
+              Based on your browsing history
             </p>
           </div>
         </div>
@@ -180,7 +158,7 @@ export default function RecentlyViewedSection({
             </button>
           </div>
 
-          {showClear && !isUsingFallback && (
+          {showClear && (
             <button
               onClick={handleClear}
               className="text-xs text-slate-400 hover:text-rose-600 transition-colors flex items-center gap-1 font-semibold"
@@ -246,15 +224,13 @@ export default function RecentlyViewedSection({
                     </span>
                   )}
 
-                  {!isUsingFallback && (
-                    <button
-                      onClick={(e) => handleRemoveOne(e, item.id)}
-                      className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-white/90 hover:bg-rose-50 hover:text-rose-600 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-xs"
-                      title="Remove from history"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  )}
+                  <button
+                    onClick={(e) => handleRemoveOne(e, item.id)}
+                    className="absolute top-1.5 left-1.5 w-6 h-6 rounded-full bg-white/90 hover:bg-rose-50 hover:text-rose-600 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center shadow-xs"
+                    title="Remove from history"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
 
                 {/* Title */}
@@ -346,17 +322,15 @@ export default function RecentlyViewedSection({
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                {!isUsingFallback && (
-                  <button
-                    onClick={() => {
-                      handleClear();
-                      setIsSeeAllOpen(false);
-                    }}
-                    className="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
-                  >
-                    Clear History
-                  </button>
-                )}
+                <button
+                  onClick={() => {
+                    handleClear();
+                    setIsSeeAllOpen(false);
+                  }}
+                  className="px-3 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-bold transition-colors"
+                >
+                  Clear History
+                </button>
                 <button
                   onClick={() => setIsSeeAllOpen(false)}
                   className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 transition-colors"

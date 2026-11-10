@@ -1,36 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert';
 import {
-  INITIAL_POPULAR_FALLBACKS,
   STORAGE_KEY,
   recordRecentlyViewedProduct,
   getRecentlyViewedProducts,
   clearRecentlyViewedProducts,
   removeRecentlyViewedProduct,
 } from './recently-viewed';
-
-test('recently-viewed: fallback list validation', async (t) => {
-  await t.test('contains all expected sample products with authentic data', () => {
-    assert.strictEqual(INITIAL_POPULAR_FALLBACKS.length, 5);
-    const names = INITIAL_POPULAR_FALLBACKS.map((item) => item.name);
-    assert.ok(names.some((n) => n.includes('ELITEBOOK 830 G7')));
-    assert.ok(names.some((n) => n.includes('Aeon 90 Litres Chest Freezer')));
-    assert.ok(names.some((n) => n.includes('NIVEA MEN Black & White')));
-    assert.ok(names.some((n) => n.includes('Mobile Phone Lens')));
-    assert.ok(names.some((n) => n.includes('Game Boy R36S')));
-  });
-
-  await t.test('has valid prices, ratings, and discounts', () => {
-    for (const item of INITIAL_POPULAR_FALLBACKS) {
-      assert.ok(item.price > 0);
-      assert.ok(typeof item.image === 'string' && item.image.length > 0);
-      if (item.compareAtPrice) {
-        assert.ok(item.compareAtPrice >= item.price);
-        assert.ok(item.discountPct !== undefined && item.discountPct > 0);
-      }
-    }
-  });
-});
 
 test('recently-viewed: browser storage simulation', async (t) => {
   const store: Record<string, string> = {};
@@ -52,6 +28,12 @@ test('recently-viewed: browser storage simulation', async (t) => {
     dispatchEvent: () => true,
     localStorage: mockLocalStorage,
   };
+
+  await t.test('returns empty array when nothing has been viewed yet', () => {
+    mockLocalStorage.clear();
+    const items = getRecentlyViewedProducts();
+    assert.strictEqual(items.length, 0);
+  });
 
   await t.test('records and retrieves recently viewed items in LIFO order', () => {
     mockLocalStorage.clear();
