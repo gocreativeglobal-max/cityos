@@ -29,6 +29,8 @@ import {
   X,
   Search,
   Wallet as WalletIcon,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -397,12 +399,25 @@ function NotificationsDropdown() {
   );
 }
 
-function WalletChip({ showCityPay }: { showCityPay: boolean }) {
+function WalletChip({ showCityPay, collapsed }: { showCityPay: boolean; collapsed?: boolean }) {
   const { balance } = useWallet();
   const { data: session } = useSession();
   const { fmt } = useMoney();
   const name = session?.user?.name || 'Resident';
   const initials = name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+
+  if (collapsed) {
+    return (
+      <Link
+        href="/profile"
+        title={`${name} · ${showCityPay ? `CityPay ${fmt(balance)}` : 'Profile'}`}
+        className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-teal-900 to-teal-700 text-white flex items-center justify-center text-xs font-black shadow-sm hover:scale-105 transition-transform"
+      >
+        {initials}
+      </Link>
+    );
+  }
+
   return (
     <Link
       href="/profile"
@@ -438,7 +453,44 @@ export default function ResidentShell({
   const router = useRouter();
   const { data: session } = useSession();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const citypayEnabled = verticalsConfig?.citypay === true;
+
+  // Restore collapsed state from localStorage on desktop mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('9jalive_desktop_sidebar_collapsed');
+      if (saved !== null) {
+        setIsCollapsed(saved === 'true');
+      }
+    } catch {}
+  }, []);
+
+  const toggleSidebar = () => {
+    setIsCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('9jalive_desktop_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  // Keyboard shortcut Ctrl+B or Cmd+B to toggle sidebar on desktop
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'b') {
+        const target = e.target as HTMLElement | null;
+        if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) {
+          return;
+        }
+        e.preventDefault();
+        toggleSidebar();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const isShopOnly =
     verticalsConfig?.shops !== false &&
@@ -576,40 +628,86 @@ export default function ResidentShell({
           <div className="flex h-screen bg-[#FAFAFA] overflow-hidden font-sans text-[#222222] selection:bg-[#FF385C]/20">
         {/* Desktop Sidebar - only in resident mode */}
         {!isWorkspace && (
-        <aside className="hidden md:flex flex-col w-[268px] bg-white border-r border-[#EBEBEB] z-20 h-full overflow-y-auto">
-          <div className="p-6 pb-4 flex flex-col gap-1 sticky top-0 bg-white z-10 border-b border-[#EBEBEB]">
-            <Link href="/" className="flex items-center gap-2.5">
+        <aside className={cn(
+          "hidden md:flex flex-col bg-white border-r border-[#EBEBEB] z-20 h-full overflow-y-auto overflow-x-hidden transition-[width] duration-200 ease-in-out shrink-0 select-none",
+          isCollapsed ? "w-[72px]" : "w-[268px]"
+        )}>
+          <div className={cn(
+            "p-4 sticky top-0 bg-white z-10 border-b border-[#EBEBEB] flex items-center transition-all",
+            isCollapsed ? "justify-center px-2 py-4" : "justify-between px-5 py-4"
+          )}>
+            <Link href="/" className="flex items-center gap-2.5 min-w-0" title="9jaLive">
               <img
                 src="/images/9jalive-logo.jpg"
                 alt="9jaLive"
                 className="w-9 h-9 rounded-xl object-cover shadow-sm border border-slate-100 shrink-0"
               />
-              <div>
-                <h1 className="text-xl font-black tracking-tight text-[#222222] leading-none">9jaLive</h1>
-                <p className="text-[9px] text-neutral-400 font-bold uppercase tracking-[0.2em] mt-0.5">
-                  {cityName}
-                </p>
-              </div>
+              {!isCollapsed && (
+                <div className="min-w-0">
+                  <h1 className="text-xl font-black tracking-tight text-[#222222] leading-none">9jaLive</h1>
+                  <p className="text-[9px] text-neutral-400 font-bold uppercase tracking-[0.2em] mt-0.5 truncate">
+                    {cityName}
+                  </p>
+                </div>
+              )}
             </Link>
+            {!isCollapsed && (
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                title="Collapse sidebar (Ctrl+B)"
+                aria-label="Collapse sidebar"
+              >
+                <PanelLeftClose className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
-          <nav className="flex-1 px-4 py-5 space-y-7">
+          {/* Quick Expand Button at Top of Collapsed Nav */}
+          {isCollapsed && (
+            <div className="pt-2 pb-1 flex justify-center">
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                title="Expand sidebar (Ctrl+B)"
+                aria-label="Expand sidebar"
+              >
+                <PanelLeftOpen className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          <nav className={cn(
+            "flex-1 py-4 space-y-6 transition-all",
+            isCollapsed ? "px-2" : "px-4"
+          )}>
             <div>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 {PRIMARY_NAV.map((item) => {
                   const active = isActive(item.path);
                   return (
                     <Link
                       key={item.id}
                       href={item.path}
+                      title={item.label}
                       className={cn(
-                        'w-full flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-bold transition-all group',
+                        'flex items-center rounded-xl transition-all group relative',
+                        isCollapsed
+                          ? 'w-10 h-10 mx-auto justify-center'
+                          : 'w-full gap-3 px-3 py-2 text-[13px] font-bold',
                         active
                           ? 'bg-[#FF385C]/10 text-[#FF385C]'
                           : 'text-neutral-500 hover:text-[#222222] hover:bg-neutral-50',
                       )}
                     >
-                      <div className="w-7 h-7 rounded-lg bg-neutral-50 border border-neutral-100/80 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform p-0.5">
+                      <div className={cn(
+                        'rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform',
+                        isCollapsed
+                          ? 'w-8 h-8'
+                          : 'w-7 h-7 bg-neutral-50 border border-neutral-100/80 p-0.5'
+                      )}>
                         <RealisticIcon
                           name={item.iconKey || item.id}
                           imageUrl={item.imageUrl}
@@ -617,20 +715,27 @@ export default function ResidentShell({
                           fallback={<item.icon className={cn('w-4 h-4', active ? 'text-[#FF385C]' : 'text-neutral-400')} />}
                         />
                       </div>
-                      <span className="truncate">{item.label}</span>
-                      {active ? <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#FF385C]" /> : null}
+                      {!isCollapsed && <span className="truncate">{item.label}</span>}
+                      {active && !isCollapsed ? <span className="ml-auto w-1.5 h-1.5 rounded-full bg-[#FF385C]" /> : null}
+                      {active && isCollapsed ? <span className="absolute right-1 top-1 w-1.5 h-1.5 rounded-full bg-[#FF385C]" /> : null}
                     </Link>
                   );
                 })}
               </div>
             </div>
-            <div className="border-t border-slate-100" />
+
+            <div className={cn("border-t border-slate-100", isCollapsed ? "my-2 mx-1" : "")} />
+
             {navGroups.map((group) => (
               <div key={group.label}>
-                <h3 className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                  {group.label}
-                </h3>
-                <div className="space-y-0.5">
+                {!isCollapsed ? (
+                  <h3 className="px-3 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                    {group.label}
+                  </h3>
+                ) : (
+                  <div className="w-6 h-px bg-slate-200 mx-auto my-2" title={group.label} />
+                )}
+                <div className="space-y-1">
                   {group.items.map((item) => {
                     const active = isActive(item.path);
                     const secondary = item.secondary;
@@ -638,19 +743,26 @@ export default function ResidentShell({
                       <Link
                         key={item.id}
                         href={item.path}
+                        title={item.label}
                         className={cn(
-                          'w-full flex items-center gap-3 rounded-xl transition-all group',
-                          secondary ? 'px-3 pb-1 pt-1 text-[11px] font-bold text-slate-400 hover:text-slate-900 hover:bg-slate-50' : 'px-3 py-2 text-[13px] font-bold',
+                          'flex items-center rounded-xl transition-all group relative',
+                          isCollapsed
+                            ? 'w-10 h-10 mx-auto justify-center'
+                            : secondary
+                              ? 'w-full gap-3 px-3 pb-1 pt-1 text-[11px] font-bold text-slate-400 hover:text-slate-900 hover:bg-slate-50 mt-0.5'
+                              : 'w-full gap-3 px-3 py-2 text-[13px] font-bold text-slate-500 hover:text-slate-900 hover:bg-slate-50',
                           active
                             ? 'bg-teal-50 text-teal-900 ring-1 ring-teal-100'
-                            : secondary
-                              ? 'mt-0.5'
-                              : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50',
+                            : '',
                         )}
                       >
                         <div className={cn(
                           'rounded-lg flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform',
-                          secondary ? 'w-5 h-5 bg-transparent' : 'w-7 h-7 bg-slate-50 border border-slate-100/80 p-0.5'
+                          isCollapsed
+                            ? 'w-8 h-8'
+                            : secondary
+                              ? 'w-5 h-5 bg-transparent'
+                              : 'w-7 h-7 bg-slate-50 border border-slate-100/80 p-0.5'
                         )}>
                           <RealisticIcon
                             name={item.iconKey || item.id}
@@ -659,8 +771,9 @@ export default function ResidentShell({
                             fallback={<item.icon className={cn(secondary ? 'w-3.5 h-3.5' : 'w-4 h-4', active ? 'text-teal-800' : secondary ? 'text-slate-300' : 'text-slate-400')} />}
                           />
                         </div>
-                        <span className="truncate">{item.label}</span>
-                        {active ? <span className="ml-auto w-1.5 h-1.5 rounded-full bg-teal-600" /> : null}
+                        {!isCollapsed && <span className="truncate">{item.label}</span>}
+                        {active && !isCollapsed ? <span className="ml-auto w-1.5 h-1.5 rounded-full bg-teal-600" /> : null}
+                        {active && isCollapsed ? <span className="absolute right-1 top-1 w-1.5 h-1.5 rounded-full bg-teal-600" /> : null}
                       </Link>
                     );
                   })}
@@ -669,8 +782,11 @@ export default function ResidentShell({
             ))}
           </nav>
 
-          <div className="p-4 border-t border-slate-100 space-y-3">
-            <WalletChip showCityPay={citypayEnabled} />
+          <div className={cn(
+            "border-t border-slate-100 transition-all",
+            isCollapsed ? "p-2 flex justify-center" : "p-4 space-y-3"
+          )}>
+            <WalletChip showCityPay={citypayEnabled} collapsed={isCollapsed} />
           </div>
         </aside>
         )}
@@ -705,6 +821,19 @@ export default function ResidentShell({
               {/* Desktop Top Nav */}
               <header className="hidden md:flex h-16 items-center justify-between px-6 lg:px-8 bg-white border-b border-slate-100 sticky top-0 z-20">
                 <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={toggleSidebar}
+                    className="p-2 -ml-2 rounded-xl text-neutral-500 hover:text-neutral-800 hover:bg-neutral-100 transition-colors"
+                    title={isCollapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'}
+                    aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+                  >
+                    {isCollapsed ? (
+                      <PanelLeftOpen className="w-5 h-5" />
+                    ) : (
+                      <PanelLeftClose className="w-5 h-5" />
+                    )}
+                  </button>
                   <h2 className="text-xs font-black text-ink uppercase tracking-[0.18em]">{getTitle()}</h2>
                 </div>
                 <div className="flex items-center gap-2">
