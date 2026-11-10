@@ -25,6 +25,7 @@ import ChowdeckBasketDock from '@/components/cityos/delivery/ChowdeckBasketDock'
 import MarketHeroSlider from '@/components/cityos/MarketHeroSlider';
 import MarketEssentialsDeals from '@/components/cityos/MarketEssentialsDeals';
 import RecentlyViewedSection from '@/components/cityos/RecentlyViewedSection';
+import MerchantOnboardingBanner from '@/components/cityos/MerchantOnboardingBanner';
 import ProductSourcingBanner from '@/components/cityos/ProductSourcingBanner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
@@ -355,6 +356,11 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
       {/* 3B. Recently Viewed Shelf (Jumia Exact Pattern) */}
       {!searchQuery.trim() && (
         <RecentlyViewedSection className="mt-2" />
+      )}
+
+      {/* 3C. Open an Online Store Merchant Onboarding Banner */}
+      {!searchQuery.trim() && (
+        <MerchantOnboardingBanner className="mt-2" />
       )}
 
       {/* Product Categories */}
