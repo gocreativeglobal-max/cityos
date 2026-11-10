@@ -27,6 +27,7 @@ import {
   Layers,
   MessageSquarePlus,
   Send,
+  Sparkles,
   X
 } from 'lucide-react';
 import { useMoney } from '@/components/cityos/CityProvider';
@@ -659,6 +660,27 @@ export default function ProductDetail({
                 Buy Now
               </button>
             </div>
+
+            {/* Out of Stock 9jaLive Sourcing Option */}
+            {isOutOfStock && (
+              <div className="p-3 bg-amber-50 border border-amber-200/90 rounded-2xl space-y-2 mt-2">
+                <p className="text-xs text-amber-900 font-bold flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+                  <span>Out of stock at this store? 9jaLive can source it!</span>
+                </p>
+                <a
+                  href={`https://wa.me/2348065373747?text=${encodeURIComponent(
+                    `🛍️ *PRODUCT SOURCING REQUEST — 9jaLive Calabar*\n━━━━━━━━━━━━━━━━━━━━━━\n*Item Needed:* ${p.name}\n*Status:* Out of stock at current store\n*Target Store:* ${p.storeName || 'Calabar Store'}\n━━━━━━━━━━━━━━━━━━━━━━\nHello 9jaLive team, this item is out of stock online. Can you check if another verified merchant or wholesaler in Calabar has it in stock?`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition-colors"
+                >
+                  <MessageSquarePlus className="w-4 h-4 fill-white" />
+                  <span>Source via 9jaLive WhatsApp (+2348065373747)</span>
+                </a>
+              </div>
+            )}
           </div>
 
           {/* PROMOTIONS BOX */}
@@ -681,6 +703,19 @@ export default function ProductDetail({
             >
               <MessageSquarePlus className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Order via WhatsApp <strong className="text-slate-900">+234 806 537 3747</strong></span>
+            </a>
+
+            {/* Custom Sourcing Prompt */}
+            <a
+              href={`https://wa.me/2348065373747?text=${encodeURIComponent(
+                `🛍️ *CUSTOM SOURCING INQUIRY — 9jaLive Calabar*\n━━━━━━━━━━━━━━━━━━━━━━\n*Regarding Product:* ${p.name}\n*Store:* ${p.storeName || 'Calabar Store'}\n━━━━━━━━━━━━━━━━━━━━━━\nHello 9jaLive, I am looking for a different specification / color / variation of this item in Calabar. Can you help me source it?`
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-[11px] font-bold text-emerald-800 hover:text-emerald-900 bg-emerald-50/70 hover:bg-emerald-100/70 p-2.5 rounded-xl border border-emerald-200/80 transition-colors"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Need a different color, spec, or accessory? <strong>Ask 9jaLive</strong></span>
             </a>
 
             <div className="flex items-start gap-2 text-slate-600">

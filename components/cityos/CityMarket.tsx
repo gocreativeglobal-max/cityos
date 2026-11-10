@@ -25,6 +25,7 @@ import ChowdeckBasketDock from '@/components/cityos/delivery/ChowdeckBasketDock'
 import MarketHeroSlider from '@/components/cityos/MarketHeroSlider';
 import MarketEssentialsDeals from '@/components/cityos/MarketEssentialsDeals';
 import RecentlyViewedSection from '@/components/cityos/RecentlyViewedSection';
+import ProductSourcingBanner from '@/components/cityos/ProductSourcingBanner';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
 import { CANONICAL_ECOMMERCE_CATEGORIES } from '@/lib/taxonomy/retail-categorizer';
@@ -520,15 +521,10 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
             ))}
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="col-span-full">
-            <EmptyState
-              icon={<ShoppingBag className="w-8 h-8 text-emerald-500" />}
-              title={`No items found in ${activeArea === 'all' ? cityName : activeArea}`}
-              description={
-                searchQuery
-                  ? 'Try searching for another product name, brand, or specification.'
-                  : 'Reset your category or area filters to view all available products.'
-              }
+          <div className="col-span-full space-y-4">
+            <ProductSourcingBanner
+              variant="empty-state"
+              searchQuery={searchQuery}
             />
           </div>
         ) : showSectionedView ? (
@@ -594,6 +590,12 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
           </div>
         )}
       </section>
+
+      {/* 4.5. On-Demand Product Sourcing Banner */}
+      <ProductSourcingBanner
+        variant="shelf"
+        className="mt-6"
+      />
 
       {/* 5. Persistent Floating Checkout Dock */}
       <ChowdeckBasketDock label="Checkout" />
