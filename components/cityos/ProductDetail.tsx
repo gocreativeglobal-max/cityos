@@ -663,21 +663,26 @@ export default function ProductDetail({
 
             {/* Out of Stock 9jaLive Sourcing Option */}
             {isOutOfStock && (
-              <div className="p-3 bg-amber-50 border border-amber-200/90 rounded-2xl space-y-2 mt-2">
-                <p className="text-xs text-amber-900 font-bold flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-700" />
-                  <span>Out of stock at this store? 9jaLive can source it!</span>
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl space-y-2.5 mt-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-800">
+                  <span>Item currently out of stock?</span>
+                  <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                    Calabar Sourcing
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 font-normal leading-relaxed">
+                  The 9jaLive sourcing desk can check real-time stock across other verified merchants in Calabar.
                 </p>
                 <a
                   href={`https://wa.me/2348065373747?text=${encodeURIComponent(
-                    `🛍️ *PRODUCT SOURCING REQUEST — 9jaLive Calabar*\n━━━━━━━━━━━━━━━━━━━━━━\n*Item Needed:* ${p.name}\n*Status:* Out of stock at current store\n*Target Store:* ${p.storeName || 'Calabar Store'}\n━━━━━━━━━━━━━━━━━━━━━━\nHello 9jaLive team, this item is out of stock online. Can you check if another verified merchant or wholesaler in Calabar has it in stock?`
+                    `*PRODUCT AVAILABILITY INQUIRY — 9jaLive Calabar*\n────────────────────────────\n*Item Requested:* ${p.name}\n*City:* Calabar\n*Previous Store:* ${p.storeName || 'Calabar Store'}\n────────────────────────────\nHello 9jaLive Team,\nThis item is listed out of stock online. Could you help check if another verified merchant in Calabar has it available?`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-xs transition-colors"
+                  className="flex items-center justify-center gap-2 w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs shadow-xs transition-colors"
                 >
-                  <MessageSquarePlus className="w-4 h-4 fill-white" />
-                  <span>Source via 9jaLive WhatsApp (+2348065373747)</span>
+                  <MessageSquarePlus className="w-4 h-4 text-emerald-400" />
+                  <span>Inquire with Sourcing Desk (+234 806 537 3747)</span>
                 </a>
               </div>
             )}

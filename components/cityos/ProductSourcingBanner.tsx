@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import {
   MessageCircle,
-  Sparkles,
   Search,
   ArrowRight,
   ShieldCheck,
-  MapPin,
   Clock,
+  PackageSearch,
+  MapPin,
 } from 'lucide-react';
 import ProductSourcingModal from '@/components/cityos/ProductSourcingModal';
 import { cn } from '@/lib/utils';
@@ -39,14 +39,15 @@ export default function ProductSourcingBanner({
     if (!typedQuery.trim()) return;
 
     const message = [
-      '🛍️ *PRODUCT SOURCING REQUEST — 9jaLive Calabar*',
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      `*Item Needed:* ${typedQuery.trim()}`,
-      '*City / Area:* Calabar',
-      '*Requested via:* CityMart Sourcing Concierge',
-      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━',
-      'Hello 9jaLive team, I was searching on CityMart and couldn’t find this product.',
-      'Please check local sellers across Calabar and send me availability & price options!',
+      '*PRODUCT SOURCING INQUIRY — 9jaLive Calabar*',
+      '────────────────────────────',
+      `*Item Requested:* ${typedQuery.trim()}`,
+      '*City:* Calabar',
+      '*Inquiry Channel:* CityMart Search',
+      '────────────────────────────',
+      'Hello 9jaLive Team,',
+      'I am looking for this product in Calabar and could not find it listed in the catalog.',
+      'Please check availability with verified stores and let me know current pricing.',
     ].join('\n');
 
     const waUrl = `https://wa.me/2348065373747?text=${encodeURIComponent(message)}`;
@@ -59,68 +60,69 @@ export default function ProductSourcingBanner({
       <>
         <div
           className={cn(
-            'relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 p-6 sm:p-8 text-white shadow-xl border border-emerald-500/20',
+            'relative overflow-hidden rounded-2xl bg-slate-900 p-6 sm:p-8 text-white shadow-lg border border-slate-800',
             className
           )}
         >
-          {/* Subtle Background Glow */}
-          <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-
-          <div className="relative z-10 max-w-2xl mx-auto text-center space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>9jaLive Calabar Personal Shopper</span>
+          <div className="relative z-10 max-w-xl mx-auto text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-300 text-xs font-semibold">
+              <PackageSearch className="w-3.5 h-3.5 text-emerald-400" />
+              <span>9jaLive Sourcing Desk</span>
+              <span className="text-slate-500">•</span>
+              <span className="text-emerald-400 flex items-center gap-1">
+                <MapPin className="w-3 h-3" />
+                Calabar
+              </span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h3 className="text-lg sm:text-xl font-bold text-white tracking-tight">
               {searchQuery ? (
                 <>
-                  Can't find &ldquo;<span className="text-emerald-400">{searchQuery}</span>&rdquo; in the catalog?
+                  Can&apos;t find &ldquo;<span className="text-emerald-400">{searchQuery}</span>&rdquo; in Calabar stores?
                 </>
               ) : (
-                <>Looking for an item that isn't listed here?</>
+                <>Looking for an item not currently listed?</>
               )}
             </h3>
 
-            <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed max-w-lg mx-auto">
-              Don&apos;t worry! <strong>9jaLive</strong> has scouts on the ground across Calabar (Marian, Watt Market, Bedwell, Bogobiri). We will find it, negotiate wholesale prices, and arrange doorstep delivery.
+            <p className="text-xs sm:text-sm text-slate-300 font-normal leading-relaxed max-w-md mx-auto">
+              Our team assists buyers in locating hard-to-find products. We check inventory across verified merchants in Calabar and provide confirmed availability and pricing.
             </p>
 
             {/* Quick Sourcing Bar */}
-            <form onSubmit={handleQuickSubmit} className="pt-2 max-w-md mx-auto flex flex-col sm:flex-row gap-2">
+            <form onSubmit={handleQuickSubmit} className="pt-1 max-w-md mx-auto flex flex-col sm:flex-row gap-2">
               <div className="relative flex-1">
                 <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={typedQuery}
                   onChange={(e) => setTypedQuery(e.target.value)}
-                  placeholder={searchQuery || "Type the exact product you need..."}
-                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-xs sm:text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  placeholder={searchQuery || "Type the product name or model..."}
+                  className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs sm:text-sm text-white placeholder:text-slate-400 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
               <button
                 type="submit"
-                className="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-1.5 shadow-md shadow-emerald-500/20 active:scale-95 transition-all shrink-0"
+                className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all shrink-0"
               >
-                <MessageCircle className="w-4 h-4 fill-slate-950" />
-                <span>Source via WhatsApp</span>
+                <MessageCircle className="w-4 h-4 fill-white" />
+                <span>Inquire on WhatsApp</span>
               </button>
             </form>
 
-            {/* Extra Options Button */}
-            <div className="pt-1 flex items-center justify-center gap-4 text-[11px] text-slate-400">
+            {/* Modal Link & Contact */}
+            <div className="pt-2 flex items-center justify-center gap-4 text-xs text-slate-400">
               <button
                 type="button"
                 onClick={() => handleOpenModal(searchQuery)}
-                className="hover:text-emerald-300 underline font-semibold flex items-center gap-1 transition-colors"
+                className="hover:text-emerald-300 underline font-medium flex items-center gap-1 transition-colors"
               >
-                <span>Add specific budget &amp; condition details</span>
+                <span>Add specific condition &amp; budget</span>
                 <ArrowRight className="w-3 h-3" />
               </button>
               <span>•</span>
-              <span className="flex items-center gap-1">
-                <MapPin className="w-3 h-3 text-emerald-400" />
-                <span>Hotline: +2348065373747</span>
+              <span className="flex items-center gap-1 text-slate-300 font-medium">
+                <span>Desk Hotline: +234 806 537 3747</span>
               </span>
             </div>
           </div>
@@ -136,42 +138,44 @@ export default function ProductSourcingBanner({
     );
   }
 
-  // 2. SHELF / PERSISTENT BANNER VARIANT (Placed at bottom of market or shelves)
+  // 2. SHELF / PERSISTENT BANNER VARIANT (Placed in market feed)
   return (
     <>
       <div
         className={cn(
-          'relative overflow-hidden rounded-3xl bg-gradient-to-r from-emerald-900 via-teal-900 to-slate-900 text-white p-5 sm:p-6 shadow-md border border-emerald-500/20',
+          'relative overflow-hidden rounded-2xl bg-slate-900 text-white p-5 sm:p-6 shadow-md border border-slate-800',
           className
         )}
       >
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-5">
           <div className="space-y-1.5 max-w-xl">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1 text-[10px] uppercase font-black tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
-                <Sparkles className="w-3 h-3 text-emerald-400" /> 9jaLive Sourcing Desk
+              <span className="inline-flex items-center gap-1.5 text-[10px] uppercase font-bold tracking-wider bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-0.5 rounded-md">
+                <PackageSearch className="w-3.5 h-3.5 text-emerald-400" />
+                9jaLive Sourcing Desk
               </span>
-              <span className="text-[11px] font-semibold text-emerald-200">
-                Calabar On-Demand Procurement
+              <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+                <MapPin className="w-3 h-3 text-emerald-400" />
+                Calabar
               </span>
             </div>
 
-            <h3 className="text-base sm:text-lg font-black text-white tracking-tight">
+            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
               Can&apos;t find what you&apos;re looking for in Calabar stores?
             </h3>
 
-            <p className="text-xs text-slate-300 font-medium leading-relaxed">
-              If an item is out of stock or unlisted, 9jaLive personal shoppers contact verified wholesalers &amp; boutiques across Calabar to locate it, inspect condition, and deliver to you.
+            <p className="text-xs text-slate-300 font-normal leading-relaxed">
+              If an item is unlisted or temporarily out of stock, our sourcing desk assists you in finding it across verified local merchants in Calabar.
             </p>
 
-            <div className="flex items-center gap-4 text-[11px] text-emerald-300/80 pt-1">
+            <div className="flex items-center gap-4 text-[11px] text-slate-400 pt-1">
               <span className="flex items-center gap-1">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Verified Local Sellers</span>
+                <span>Verified Local Merchants</span>
               </span>
               <span className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5 text-emerald-400" />
-                <span>Rapid WhatsApp Response</span>
+                <span>Direct WhatsApp Support</span>
               </span>
             </div>
           </div>
@@ -179,10 +183,10 @@ export default function ProductSourcingBanner({
           <div className="shrink-0 flex items-center gap-2.5 w-full md:w-auto">
             <button
               onClick={() => handleOpenModal()}
-              className="w-full md:w-auto px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+              className="w-full md:w-auto px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-all"
             >
-              <MessageCircle className="w-4.5 h-4.5 fill-slate-950" />
-              <span>Tell Us What You Need (+2348065373747)</span>
+              <MessageCircle className="w-4 h-4 fill-white" />
+              <span>Request an Item (+234 806 537 3747)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -193,7 +197,7 @@ export default function ProductSourcingBanner({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialQuery={typedQuery}
-        sourceContext="Marketplace Bottom Concierge"
+        sourceContext="Marketplace Bottom Banner"
       />
     </>
   );
