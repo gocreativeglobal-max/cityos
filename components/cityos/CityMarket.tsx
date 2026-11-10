@@ -60,18 +60,18 @@ function interleaveByStore(items: GlovoProductItem[]): GlovoProductItem[] {
   return result;
 }
 
-export default function CityMarket() {
+export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
   const { city } = useCity();
   const cityName = city?.name ?? 'Calabar';
 
-  const [stores, setStores] = useState<StoreCardData[]>([]);
-  const [products, setProducts] = useState<GlovoProductItem[]>([]);
-  const [categories, setCategories] = useState<CategoryBubbleItem[]>([]);
-  const [storeSectors, setStoreSectors] = useState<CategoryBubbleItem[]>([]);
-  const [deliveryHubs, setDeliveryHubs] = useState<DeliveryHubOption[]>([]);
-  const [defaultAddress, setDefaultAddress] = useState<string | null>(null);
-  const [topSearchTags, setTopSearchTags] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [stores, setStores] = useState<StoreCardData[]>(initialFeed?.stores || []);
+  const [products, setProducts] = useState<GlovoProductItem[]>(initialFeed?.products || []);
+  const [categories, setCategories] = useState<CategoryBubbleItem[]>(initialFeed?.categories || []);
+  const [storeSectors, setStoreSectors] = useState<CategoryBubbleItem[]>(initialFeed?.storeSectors || []);
+  const [deliveryHubs, setDeliveryHubs] = useState<DeliveryHubOption[]>(initialFeed?.deliveryHubs || []);
+  const [defaultAddress, setDefaultAddress] = useState<string | null>(initialFeed?.defaultAddress || null);
+  const [topSearchTags, setTopSearchTags] = useState<string[]>(initialFeed?.topSearchTags || []);
+  const [loading, setLoading] = useState(!initialFeed);
 
   // Instant Client-Side Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -138,6 +138,11 @@ export default function CityMarket() {
   useEffect(() => {
     let active = true;
     async function load() {
+      // If we already have initial data for the current city, skip redundant mount fetch
+      if (initialFeed && (!city?.slug || city.slug === 'calabar')) {
+        setLoading(false);
+        return;
+      }
       setLoading(true);
       try {
         const feed = await getCityMarketFeed(city?.slug, 'All');
@@ -159,7 +164,7 @@ export default function CityMarket() {
     return () => {
       active = false;
     };
-  }, [city?.slug]);
+  }, [city?.slug, initialFeed]);
 
   // Derive distinct areas/neighborhoods from stores and products
   const areaPills = useMemo(() => {

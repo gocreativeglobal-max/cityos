@@ -270,6 +270,7 @@ export async function placeRetailOrder(input: {
   try { 
     revalidatePath('/workspaces/shopos'); 
     revalidatePath('/market'); 
+    clearMarketFeedCache();
     for(const item of input.items) { 
       revalidatePath(`/product/${item.productId}`); 
     } 
@@ -329,6 +330,20 @@ import {
 } from '@/lib/taxonomy/retail-categorizer';
 import { isTestOrDemoOrganization, isTestOrDemoProduct } from '@/lib/storefront-filter';
 
+// High-speed In-Memory Feed Cache (60s TTL)
+const marketFeedCache = new Map<string, { data: any; timestamp: number }>();
+const MARKET_FEED_CACHE_TTL = 60 * 1000;
+
+export function clearMarketFeedCache(citySlug?: string) {
+  if (citySlug) {
+    for (const key of marketFeedCache.keys()) {
+      if (key.includes(citySlug)) marketFeedCache.delete(key);
+    }
+  } else {
+    marketFeedCache.clear();
+  }
+}
+
 export async function getCityMartProducts(citySlug?: string, cat: string = 'All') {
   // Explicit slug wins; otherwise resolve the session's current city.
   const city = citySlug ? await getCityBySlug(citySlug) : await getCurrentCity();
@@ -340,8 +355,7 @@ export async function getCityMartProducts(citySlug?: string, cat: string = 'All'
   const orgs = allOrgs.filter(
     (o: any) => o.type === 'RETAIL' && orgIdsInCity.includes(o.id) && !isTestOrDemoOrganization(o)
   );
-  const orgIds = orgs.map(o => o.id);
-
+  const orgIds = orgs.map((o) => o.id);
   if (orgIds.length === 0) return [];
 
   const allProducts = await db.orm.public.RetailProduct.all();
@@ -354,14 +368,25 @@ export async function getCityMartProducts(citySlug?: string, cat: string = 'All'
       const org = orgs.find((o) => o.id === p.organizationId);
       const classified = classifyRetailProduct({
         name: p.name,
-        description: p.description,
+        description: p.description?.slice(0, 100) || '',
         price: p.price,
         storeCategory: (org as any)?.storeCategory,
       });
       const explicitAisle = p.categoryId ? categoryNameMap.get(p.categoryId) : null;
       const area = org?.address ? org.address.split(',')[0].trim() : city.name;
       return {
-        ...p,
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        compareAtPrice: p.compareAtPrice,
+        imageAssetId: p.imageAssetId,
+        imageUrl: p.imageUrl,
+        stockQuantity: p.stockQuantity ?? 5,
+        lowStockLevel: p.lowStockLevel,
+        isWeighed: p.isWeighed ?? false,
+        unit: p.unit || 'ea',
+        sku: p.sku,
+        organizationId: p.organizationId,
         globalCategory: (p.globalCategory && p.globalCategory !== 'General Goods') ? p.globalCategory : classified.globalCategory,
         categoryName: explicitAisle || classified.inStoreCategory,
         brand: classified.brand,
@@ -385,7 +410,7 @@ export async function getCityMartProducts(citySlug?: string, cat: string = 'All'
   });
 }
 
-export async function getCityMartStores(citySlug?: string) {
+export async function getCityMartStores(citySlug?: string, preloadedProducts?: any[]) {
   const city = citySlug ? await getCityBySlug(citySlug) : await getCurrentCity();
   if (!city) return [];
 
@@ -398,7 +423,7 @@ export async function getCityMartStores(citySlug?: string) {
 
   const listings = await db.orm.public.DiscoveryListing.where({ cityId: city.id }).all();
   const listingMap = new Map(listings.map((l: any) => [l.organizationId, l]));
-  const allProducts = await db.orm.public.RetailProduct.all();
+  const allProducts = preloadedProducts || (await db.orm.public.RetailProduct.all());
 
   return orgs
     .map((o: any) => {
@@ -451,6 +476,12 @@ export async function getCityMartStores(citySlug?: string) {
 }
 
 export async function getCityMarketFeed(citySlug?: string, activeAisle: string = 'All') {
+  const cacheKey = `${citySlug || 'default'}-${activeAisle}`;
+  const hit = marketFeedCache.get(cacheKey);
+  if (hit && Date.now() - hit.timestamp < MARKET_FEED_CACHE_TTL) {
+    return hit.data;
+  }
+
   const city = citySlug ? await getCityBySlug(citySlug) : await getCurrentCity();
   if (!city) {
     return {
@@ -465,10 +496,10 @@ export async function getCityMarketFeed(citySlug?: string, activeAisle: string =
     };
   }
 
-  // Always fetch all city products so client-side filtering is instant
-  const [stores, allProducts, campaigns] = await Promise.all([
-    getCityMartStores(city.slug),
-    getCityMartProducts(city.slug, 'All'),
+  // Always fetch all city products first, then pass to store inferencing to avoid duplicate DB queries
+  const allProducts = await getCityMartProducts(city.slug, 'All');
+  const [stores, campaigns] = await Promise.all([
+    getCityMartStores(city.slug, allProducts),
     getStorefrontPromotions(city.slug, 'MARKET'),
   ]);
 
@@ -561,7 +592,7 @@ export async function getCityMarketFeed(citySlug?: string, activeAisle: string =
     ])
   ).slice(0, 6);
 
-  return {
+  const result = {
     stores,
     products,
     campaigns,
@@ -571,6 +602,9 @@ export async function getCityMarketFeed(citySlug?: string, activeAisle: string =
     defaultAddress,
     topSearchTags,
   };
+
+  marketFeedCache.set(cacheKey, { data: result, timestamp: Date.now() });
+  return result;
 }
 
 export async function getCityMartProduct(productId: string) {

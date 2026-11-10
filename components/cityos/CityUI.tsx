@@ -94,6 +94,7 @@ export function FallbackImg({
       src={activeSrc}
       alt={alt}
       loading="lazy"
+      decoding="async"
       onError={() => {
         if (!failed) setFailed(true);
       }}
