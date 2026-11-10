@@ -4,7 +4,7 @@ import { getCityMarketFeed } from '@/app/actions/commerce';
 import VerticalPausedNotice from '@/components/cityos/VerticalPausedNotice';
 import CityMarket from '@/components/cityos/CityMarket';
 
-export const revalidate = 60; // Incremental Static Regeneration cache: 60s
+export const dynamic = 'force-dynamic';
 
 export default async function MarketPage() {
   const config = await getVerticalsConfig();

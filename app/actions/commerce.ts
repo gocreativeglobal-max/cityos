@@ -334,7 +334,7 @@ import { isTestOrDemoOrganization, isTestOrDemoProduct } from '@/lib/storefront-
 const marketFeedCache = new Map<string, { data: any; timestamp: number }>();
 const MARKET_FEED_CACHE_TTL = 60 * 1000;
 
-export function clearMarketFeedCache(citySlug?: string) {
+export async function clearMarketFeedCache(citySlug?: string) {
   if (citySlug) {
     for (const key of marketFeedCache.keys()) {
       if (key.includes(citySlug)) marketFeedCache.delete(key);

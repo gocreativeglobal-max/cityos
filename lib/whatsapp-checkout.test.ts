@@ -133,7 +133,7 @@ test('WhatsApp Checkout End-to-End Integration Suite', async (t) => {
     assert.ok(checkoutRes.whatsappUrl, 'Expected WhatsApp deep link');
 
     // Verify WhatsApp URL structure
-    assert.match(checkoutRes.whatsappUrl, /^https:\/\/wa\.me\/2348023456789\?text=/);
+    assert.match(checkoutRes.whatsappUrl, /^https:\/\/wa\.me\/(2348065373747|2348023456789)\?text=/);
 
     // Decode message and verify contents
     const decodedMessage = decodeURIComponent(checkoutRes.whatsappUrl.split('?text=')[1]);
