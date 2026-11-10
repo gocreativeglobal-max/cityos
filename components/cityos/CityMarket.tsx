@@ -24,6 +24,7 @@ import GlovoProductCard, { GlovoProductItem } from '@/components/cityos/delivery
 import ChowdeckBasketDock from '@/components/cityos/delivery/ChowdeckBasketDock';
 import MarketHeroSlider from '@/components/cityos/MarketHeroSlider';
 import MarketEssentialsDeals from '@/components/cityos/MarketEssentialsDeals';
+import RecentlyViewedSection from '@/components/cityos/RecentlyViewedSection';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
 import { CANONICAL_ECOMMERCE_CATEGORIES } from '@/lib/taxonomy/retail-categorizer';
@@ -343,6 +344,11 @@ export default function CityMarket() {
           onSelectCategory={(catId) => handleSelectAisle(catId)}
           onSearchKeyword={(kw) => setSearchQuery(kw)}
         />
+      )}
+
+      {/* 3B. Recently Viewed Shelf (Jumia Exact Pattern) */}
+      {!searchQuery.trim() && (
+        <RecentlyViewedSection className="mt-2" />
       )}
 
       {/* Product Categories */}

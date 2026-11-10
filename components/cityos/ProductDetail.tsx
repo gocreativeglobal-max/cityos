@@ -39,6 +39,8 @@ import { FallbackImg } from '@/components/cityos/CityUI';
 import GlovoProductCard, { GlovoProductItem } from '@/components/cityos/delivery/GlovoProductCard';
 import ChowdeckBasketDock from '@/components/cityos/delivery/ChowdeckBasketDock';
 import SaveButton from '@/components/cityos/SaveButton';
+import RecentlyViewedSection from '@/components/cityos/RecentlyViewedSection';
+import { recordRecentlyViewedProduct } from '@/lib/recently-viewed';
 
 interface ParsedDetails {
   overview: string;
@@ -271,6 +273,24 @@ export default function ProductDetail({
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const productImg = galleryImages[activeImageIndex] || galleryImages[0] || p?.imageUrl || undefined;
+
+  // Record this product in Recently Viewed history (Jumia pattern)
+  useEffect(() => {
+    if (p && p.id && activeProduct?.price) {
+      recordRecentlyViewedProduct({
+        id: p.id,
+        name: p.name,
+        price: activeProduct.price,
+        compareAtPrice: activeProduct.compareAtPrice,
+        image: productImg,
+        storeName: p.storeName || 'Store',
+        organizationId: p.organizationId,
+        categoryName: p.categoryName || p.globalCategory || 'Retail',
+        rating: reviewsData?.distribution?.averageRating ?? 4.2,
+        reviewsCount: reviewsData?.distribution?.totalReviews ?? 18,
+      });
+    }
+  }, [p?.id, activeProduct?.price, productImg, reviewsData]);
 
   const handleAdd = () => {
     if (isOutOfStock) return;
@@ -1170,6 +1190,9 @@ export default function ProductDetail({
           </div>
         </section>
       )}
+
+      {/* 4C. RECENTLY VIEWED SECTION (JUMIA PATTERN) */}
+      <RecentlyViewedSection currentProductId={p?.id} />
 
       {/* 5. STICKY MOBILE BOTTOM BAR */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 p-3 shadow-2xl flex items-center justify-between gap-3">
