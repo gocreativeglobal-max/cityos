@@ -218,10 +218,11 @@ async function main() {
     const T_STOCK = resolveTable(['retailLocationStock', 'RetailLocationStock', 'retail_location_stock']);
 
     const initialProduct = {
-      name: 'Luxury Chunky Runner Sneakers – Red Patent & Black Ballistic Mesh with Air Bubble Cushioning',
+      name: 'Luxury Chunky Runner Sneakers – Red Patent & Black Ballistic Mesh (Size 43)',
+      variantName: 'Size 43',
       category: 'Footwear & Sneakers',
       globalCategory: 'Fashion, Shoes & Accessories',
-      description: 'Elevate your streetwear aesthetic with these premier chunky runner sneakers from G.Wears. Crafted with vibrant red patent leather overlays set against high-durability black ballistic mesh, these luxury sneakers combine avant-garde street style with responsive athletic performance.\n\nKey Features:\n• Glossy Red Patent Leather: Sleek, high-shine statement panels.\n• Breathable Technical Mesh: Keeps your feet cool and comfortable all day.\n• Sculpted Air Cushion Midsole: Absorbs impact and provides responsive bounce.\n• Ergonomic Grip Outsole: Durable high-traction rubber tread.\n• Padded Collar & Tongue: Premium plush interior lining for supreme comfort.\n\nSpecifications:\n• Store: G.Wears Calabar\n• Category: Luxury Footwear / Streetwear Sneakers\n• Colorway: Cherry Red / Jet Black\n• Sole Type: Air Cushion Bubble Midsole\n• Closure: Lace-Up\n• Gender: Unisex',
+      description: 'Elevate your streetwear aesthetic with these premier chunky runner sneakers from G.Wears. Crafted with vibrant red patent leather overlays set against high-durability black ballistic mesh, these luxury sneakers combine avant-garde street style with responsive athletic performance.\n\nKey Features:\n• Glossy Red Patent Leather: Sleek, high-shine statement panels.\n• Breathable Technical Mesh: Keeps your feet cool and comfortable all day.\n• Sculpted Air Cushion Midsole: Absorbs impact and provides responsive bounce.\n• Ergonomic Grip Outsole: Durable high-traction rubber tread.\n• Padded Collar & Tongue: Premium plush interior lining for supreme comfort.\n\nSpecifications:\n• Store: G.Wears Calabar\n• Category: Luxury Footwear / Streetwear Sneakers\n• Colorway: Cherry Red / Jet Black\n• Sole Type: Air Cushion Bubble Midsole\n• Closure: Lace-Up\n• Size: EU 43\n• Gender: Unisex',
       price: 130000,
       cost: 130000,
       compareAtPrice: 165000,
@@ -242,14 +243,15 @@ async function main() {
     if (prodCheck.rows.length === 0) {
       productId = crypto.randomUUID();
       await client.query(
-        `INSERT INTO ${T_PRODUCT} (id, "organizationId", "categoryId", "globalCategory", name, description, price, cost, "compareAtPrice", "stockQuantity", unit, "imageAssetId", "isWeighed")
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, false)`,
+        `INSERT INTO ${T_PRODUCT} (id, "organizationId", "categoryId", "globalCategory", name, "variantName", description, price, cost, "compareAtPrice", "stockQuantity", unit, "imageAssetId", "isWeighed")
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, false)`,
         [
           productId,
           orgId,
           categoryIdByName.get(initialProduct.category),
           initialProduct.globalCategory,
           initialProduct.name,
+          initialProduct.variantName,
           initialProduct.description,
           initialProduct.price,
           initialProduct.cost,
@@ -262,7 +264,15 @@ async function main() {
       console.log(`✓ Created product: ${initialProduct.name}`);
     } else {
       productId = prodCheck.rows[0].id;
-      console.log(`✓ Product exists: ${productId}`);
+      await client.query(
+        `UPDATE ${T_PRODUCT}
+         SET name = $2,
+             "variantName" = $3,
+             description = $4
+         WHERE id = $1`,
+        [productId, initialProduct.name, initialProduct.variantName, initialProduct.description]
+      );
+      console.log(`✓ Updated product: ${productId} with Size 43`);
     }
 
     // Upsert location stock
