@@ -35,8 +35,11 @@ async function main() {
     const T_STOCK = resolveTable(['retailLocationStock', 'RetailLocationStock', 'retail_location_stock']);
 
     // Ensure image exists in public folder
-    const productImageRelPath = '/images/products/calabar-mall/alpenliebe-eclairs.jpg';
-    const storeLogoRelPath = '/images/products/calabar-mall/alpenliebe-eclairs.jpg';
+    const productImages = [
+      '/images/products/calabar-mall/alpenliebe-eclairs-packshot.jpg',
+      '/images/products/calabar-mall/alpenliebe-eclairs.jpg',
+    ];
+    const storeLogoRelPath = '/images/products/calabar-mall/alpenliebe-eclairs-packshot.jpg';
 
     await client.query('BEGIN');
 
@@ -220,7 +223,7 @@ async function main() {
              "variantName" = 'Bag',
              "isWeighed" = false
          WHERE id = $1`,
-        [productId, categoryId, productDesc, JSON.stringify([productImageRelPath])]
+        [productId, categoryId, productDesc, JSON.stringify(productImages)]
       );
       console.log('✓ Updated Product:', productName);
     } else {
@@ -228,7 +231,7 @@ async function main() {
       await client.query(
         `INSERT INTO ${T_PRODUCT} (id, "organizationId", "categoryId", "globalCategory", name, "variantName", description, price, cost, "compareAtPrice", "stockQuantity", unit, "imageAssetId", "isWeighed")
          VALUES ($1, $2, $3, 'Groceries & Supermarket', $4, 'Bag', $5, 1800, 1800, 2200, 100, 'bag', $6, false)`,
-        [productId, orgId, categoryId, productName, productDesc, JSON.stringify([productImageRelPath])]
+        [productId, orgId, categoryId, productName, productDesc, JSON.stringify(productImages)]
       );
       console.log('✓ Created Product:', productName);
     }
