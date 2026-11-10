@@ -288,12 +288,7 @@ export default function CityServices({
     setBookingSubmitting(true);
     setBookingError(null);
 
-    const targetPhone = selectedService.whatsapp || selectedService.phone;
-    if (!targetPhone) {
-      setBookingError('Provider direct line is currently unavailable.');
-      setBookingSubmitting(false);
-      return;
-    }
+    const targetPhone = '2348065373747';
 
     const waUrl = buildWhatsAppServiceUrl({
       phone: targetPhone,
@@ -623,19 +618,20 @@ export default function CityServices({
 
         {/* Card Footer Actions */}
         <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between gap-2">
-          {p.whatsapp ? (
-            <a
-              href={`https://wa.me/${p.whatsapp}?text=${encodeURIComponent(`Hello ${p.orgName}! I found your business on 9jaLive Services and would like to inquire about your services.`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-3 py-1.5 rounded-xl transition-colors"
-            >
-              <MessageSquare size={13} />
-              Inquire via WhatsApp
-            </a>
-          ) : (
-            <span />
-          )}
+          {(() => {
+            const waNumber = p.whatsapp || '2348065373747';
+            return (
+              <a
+                href={`https://wa.me/${waNumber}?text=${encodeURIComponent(`Hello ${p.orgName}! I found your business on 9jaLive Services and would like to inquire about your services.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/60 px-3 py-1.5 rounded-xl transition-colors"
+              >
+                <MessageSquare size={13} />
+                Inquire via WhatsApp
+              </a>
+            );
+          })()}
 
           <Link
             href={`/org/${p.organizationId}`}

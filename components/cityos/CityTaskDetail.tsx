@@ -335,26 +335,30 @@ export default function CityTaskDetail({ id }: { id: string }) {
               </div>
 
               <div className="flex items-center gap-2">
-                {task.organization?.phone && (
-                  <a
-                    href={`tel:${task.organization.phone}`}
-                    className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors inline-flex items-center gap-1.5 text-xs font-bold shadow-2xs"
-                  >
-                    <Phone className="w-3.5 h-3.5" /> Call
-                  </a>
-                )}
-                {task.organization?.phone && (
-                  <a
-                    href={`https://wa.me/${task.organization.phone.replace(/\D/g, '')}?text=${encodeURIComponent(
-                      `Hello ${task.organization.name}, regarding my booking for ${task.title} (Ref: ${task.id.slice(0, 8)})`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors inline-flex items-center gap-1.5 text-xs font-bold shadow-2xs"
-                  >
-                    <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Pro
-                  </a>
-                )}
+                {(() => {
+                  const phoneNum = task.organization?.phone || '+2348065373747';
+                  const waNum = phoneNum.replace(/\D/g, '') || '2348065373747';
+                  return (
+                    <>
+                      <a
+                        href={`tel:${phoneNum}`}
+                        className="p-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors inline-flex items-center gap-1.5 text-xs font-bold shadow-2xs"
+                      >
+                        <Phone className="w-3.5 h-3.5" /> Call
+                      </a>
+                      <a
+                        href={`https://wa.me/${waNum}?text=${encodeURIComponent(
+                          `Hello ${task.organization?.name || 'Support'}, regarding my booking for ${task.title} (Ref: ${task.id.slice(0, 8)})`
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white transition-colors inline-flex items-center gap-1.5 text-xs font-bold shadow-2xs"
+                      >
+                        <MessageCircle className="w-3.5 h-3.5" /> WhatsApp Pro
+                      </a>
+                    </>
+                  );
+                })()}
               </div>
             </div>
           </div>

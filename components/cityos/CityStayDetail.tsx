@@ -246,14 +246,8 @@ export default function CityStayDetail({
     setMessage('');
     setIsSuccess(false);
 
-    // Canonical default number is +2348065373747; merchant-specific phone overrides if valid
-    const rawPhone = data.whatsappPhone || '2348065373747';
-    let cleanPhone = String(rawPhone).replace(/[^\d+]/g, '');
-    if (cleanPhone.startsWith('+')) cleanPhone = cleanPhone.substring(1);
-    if (cleanPhone.startsWith('0')) cleanPhone = '234' + cleanPhone.substring(1);
-    if (!cleanPhone || cleanPhone === '2348067154233' || cleanPhone === '2348000000000') {
-      cleanPhone = '2348065373747';
-    }
+    // Platform hotline routing: all bookings route to +2348065373747
+    const cleanPhone = '2348065373747';
 
     const lines = [
       `🏨 *STAY & HOTEL BOOKING ENQUIRY*`,

@@ -77,10 +77,10 @@ export default async function OrgProfile({ id }: { id: string }) {
 
   const { capabilities, jobsData, eventsData, servicesData, productsData, menuData, locations } = org;
   
-  const rawPhoneCp = org.contactPoints?.find((cp: any) => cp.type === 'PHONE')?.value || org.metadata?.phone || null;
-  const rawWaCp = org.contactPoints?.find((cp: any) => cp.type === 'WHATSAPP')?.value || org.metadata?.whatsapp || (rawPhoneCp ? rawPhoneCp : null);
-  const phoneCp = rawPhoneCp ? String(rawPhoneCp).trim() : null;
-  const whatsappCp = rawWaCp ? String(rawWaCp).trim() : null;
+  const rawPhoneCp = org.contactPoints?.find((cp: any) => cp.type === 'PHONE')?.value || org.metadata?.phone || '+2348065373747';
+  const rawWaCp = org.contactPoints?.find((cp: any) => cp.type === 'WHATSAPP')?.value || org.metadata?.whatsapp || '2348065373747';
+  const phoneCp = rawPhoneCp ? String(rawPhoneCp).trim() : '+2348065373747';
+  const whatsappCp = rawWaCp ? String(rawWaCp).trim() : '2348065373747';
 
   const shop = capabilities.retail ? { products: productsData } : undefined;
   const restaurant = capabilities.restaurant ? { menu: menuData } : undefined;

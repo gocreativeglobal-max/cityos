@@ -646,11 +646,21 @@ export default function ProductDetail({
             <h4 className="font-bold text-slate-900 uppercase tracking-wider text-[11px]">Promotions & Ordering Support</h4>
             
             <a 
-              href="tel:07002489266" 
+              href="tel:+2348065373747" 
               className="flex items-center gap-2 text-slate-700 hover:text-emerald-700 font-semibold transition-colors"
             >
               <PhoneCall className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Call <strong className="text-slate-900">0700-CITYCONNECT</strong> To Place Your Order</span>
+              <span>Call <strong className="text-slate-900">+234 806 537 3747</strong> To Place Your Order</span>
+            </a>
+
+            <a 
+              href={`https://wa.me/2348065373747?text=${encodeURIComponent(`Hello CityMart, I would like to place an order for "${p.name}" (₦${p.price?.toLocaleString()}): ${typeof window !== 'undefined' ? window.location.href : ''}`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-slate-700 hover:text-emerald-700 font-semibold transition-colors"
+            >
+              <MessageSquarePlus className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Order via WhatsApp <strong className="text-slate-900">+234 806 537 3747</strong></span>
             </a>
 
             <div className="flex items-start gap-2 text-slate-600">

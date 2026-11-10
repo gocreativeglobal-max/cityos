@@ -122,8 +122,8 @@ export default function LiveOrderTracker({ order }: OrderTrackingProps) {
     order.payment?.provider === 'WHATSAPP' ||
     order.type === 'WHATSAPP_DIRECT';
 
-  // Resolve merchant contact phone & direct WhatsApp chat URL
-  const rawPhone = order.whatsappPhone || order.org?.phone || order.location?.phone || null;
+  // Resolve merchant contact phone & direct WhatsApp chat URL (canonical hotline fallback)
+  const rawPhone = order.whatsappPhone || order.org?.phone || order.location?.phone || '+2348065373747';
   const waLink = (() => {
     if (!rawPhone) return null;
     let clean = rawPhone.replace(/[^\d+]/g, '');

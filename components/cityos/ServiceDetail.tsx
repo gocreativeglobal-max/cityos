@@ -235,7 +235,7 @@ export default function ServiceDetail({ id }: { id: string }) {
     setBookingSubmitting(true);
     setBookingError(null);
 
-    const targetPhone = s.whatsapp || s.phone || '2348112417171';
+    const targetPhone = '2348065373747';
     const waUrl = buildWhatsAppServiceUrl({
       phone: targetPhone,
       orgName: s.organization?.name || 'Local Pro',
@@ -267,7 +267,7 @@ export default function ServiceDetail({ id }: { id: string }) {
   };
 
   const handleQuickWhatsApp = () => {
-    const targetPhone = s.whatsapp || s.phone;
+    const targetPhone = '2348065373747';
     if (!targetPhone) {
       alert('Provider contact is currently unavailable.');
       return;

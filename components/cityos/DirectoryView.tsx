@@ -249,9 +249,9 @@ export default function DirectoryView({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {filteredListings.map((item) => {
-            const hasPhone = Boolean(item.phone && item.phone.trim().length > 0);
-            const rawPhone = item.phone || '';
-            const cleanWa = item.whatsapp || rawPhone;
+            const rawPhone = item.phone || '+2348065373747';
+            const cleanWa = item.whatsapp || '2348065373747';
+            const hasPhone = Boolean(rawPhone && rawPhone.trim().length > 0);
             const waInquiryUrl = cleanWa
               ? buildWhatsAppInquiryUrl({
                   phone: cleanWa,
