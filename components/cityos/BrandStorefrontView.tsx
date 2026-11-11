@@ -4,14 +4,12 @@ import React, { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
-  Star,
   Phone,
   MessageSquare,
   Search,
   X,
   SlidersHorizontal,
   Sparkles,
-  Truck,
   CheckCircle2,
   ChevronRight,
   Flame,
@@ -19,7 +17,6 @@ import {
   Heart,
   Share2,
   PackageCheck,
-  Tag,
   ArrowUpRight,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -255,14 +252,6 @@ export default function BrandStorefrontView({
               </h1>
 
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 font-medium">
-                <div className="flex items-center gap-1 bg-amber-400/10 px-2.5 py-0.5 rounded-full border border-amber-400/20 text-amber-300 font-bold">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span>4.8</span>
-                  <span className="text-white/60 font-normal">(1,420+ Calabar Reviews)</span>
-                </div>
-                <span>•</span>
-                <span className="text-slate-300">12.8k Followers</span>
-                <span>•</span>
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   Depot Open · Dispatches in 2 Hours
@@ -372,50 +361,7 @@ export default function BrandStorefrontView({
         </div>
       </div>
 
-      {/* 3. 4-Pillar Manufacturer Authenticity Guarantee Strip */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-900 leading-snug">100% Genuine Guaranteed</h4>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Sourced direct from Unilever Nigeria</p>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
-            <Truck className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-900 leading-snug">Calabar Rapid Delivery</h4>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Same-day dispatch to your doorstep</p>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-            <Tag className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-900 leading-snug">Factory Direct Prices</h4>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Best retail & bulk bundle discounts</p>
-          </div>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
-            <MessageSquare className="w-5 h-5" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-900 leading-snug">WhatsApp Concierge</h4>
-            <p className="text-[11px] text-slate-500 font-medium mt-0.5">Chat with Depot (+234 806 537 3747)</p>
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Sub-Brand Interactive Filter Rail (Jumia mlp exact pattern) */}
+      {/* 3. Sub-Brand Interactive Filter Rail (Jumia mlp exact pattern) */}
       <section className="space-y-3 bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-sm">
         <div className="flex items-center justify-between">
           <div>
