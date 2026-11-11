@@ -361,6 +361,11 @@ export async function getResidentOrganization(rawIdentifier: string) {
     identifier = decodeURIComponent(rawIdentifier).trim();
   } catch {}
 
+  // Brand aliases (e.g. unilever -> unilever-store)
+  if (identifier.toLowerCase() === 'unilever') {
+    identifier = 'unilever-store';
+  }
+
   let listing = await db.orm.public.DiscoveryListing.where({ slug: identifier }).first();
   if (!listing && identifier !== rawIdentifier) {
     listing = await db.orm.public.DiscoveryListing.where({ slug: rawIdentifier }).first();

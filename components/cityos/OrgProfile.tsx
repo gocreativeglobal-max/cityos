@@ -17,6 +17,7 @@ import EnquiryModal from '@/components/cityos/EnquiryModal';
 import BusinessReviewsSection from '@/components/cityos/BusinessReviewsSection';
 import { getOrganizationReviews } from '@/lib/actions/reviews';
 import { buildWhatsAppServiceUrl } from '@/lib/whatsapp';
+import BrandStorefrontView from '@/components/cityos/BrandStorefrontView';
 
 export default async function OrgProfile({ id }: { id: string }) {
   const org = await getCanonicalOrganization(id);
@@ -76,6 +77,39 @@ export default async function OrgProfile({ id }: { id: string }) {
   }
 
   const { capabilities, jobsData, eventsData, servicesData, productsData, menuData, locations } = org;
+
+  // Official Brand Flagships (e.g. Unilever Nigeria) use dedicated flagship layout
+  if (org.id === 'unilever-store' || org.metadata?.isOfficialBrandStore) {
+    return (
+      <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-300">
+        {isManager && (
+          <div className="bg-slate-900 text-white rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-lg border border-slate-800 animate-in fade-in duration-200">
+            <div className="flex items-center gap-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <div>
+                <p className="text-xs font-black text-white flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-teal-400" />
+                  You manage this brand store as <span className="text-teal-300 uppercase tracking-wide">{userRole}</span>
+                </p>
+                <p className="text-[11px] text-slate-400 font-medium">
+                  Manage official inventory, dispatches, and brand assets in ShopOS.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href={workspaceUrl}
+                className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-black transition-colors shadow-sm flex items-center gap-1.5"
+              >
+                Open ShopOS Workspace <ArrowUpRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        )}
+        <BrandStorefrontView org={org} products={productsData || []} />
+      </div>
+    );
+  }
   
   const rawPhoneCp = org.contactPoints?.find((cp: any) => cp.type === 'PHONE')?.value || org.metadata?.phone || '+2348065373747';
   const rawWaCp = org.contactPoints?.find((cp: any) => cp.type === 'WHATSAPP')?.value || org.metadata?.whatsapp || '2348065373747';
