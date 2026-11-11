@@ -31,7 +31,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
 import { CANONICAL_ECOMMERCE_CATEGORIES } from '@/lib/taxonomy/retail-categorizer';
 
-const SECTION_PREVIEW_LIMIT = 10;
+const SECTION_PREVIEW_LIMIT = 5;
 
 // Priority order for frontpage category shelves (the 9 core categories + universal Jumia/Jiji/Amazon departments)
 const CATEGORY_PRIORITY_ORDER: string[] = CANONICAL_ECOMMERCE_CATEGORIES.map((c) => c.id);
@@ -565,7 +565,7 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
                   </button>
                 </div>
 
-                {/* Top 10 Products in this Section */}
+                {/* Top 5 Products in this Section */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-4">
                   {section.previewItems.map((product) => (
                     <GlovoProductCard key={product.id} product={product} />
