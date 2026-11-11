@@ -667,27 +667,8 @@ export default function BrandStorefrontView({
                 stockQuantity: typeof p.stockQuantity === 'number' ? p.stockQuantity : 100,
               };
 
-              const whatsappItemUrl = `https://wa.me/${whatsappClean}?text=${encodeURIComponent(
-                `Hello Unilever Official Store Desk, I want to order "${p.name}" (${fmt(p.price)}) via Calabar 9jaLive.`
-              )}`;
-
               return (
-                <div key={p.id} className="flex flex-col justify-between bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md hover:border-blue-200 transition-all group">
-                  <GlovoProductCard product={prodItem} className="border-0 shadow-none" />
-
-                  {/* WhatsApp Direct Buy Link */}
-                  <div className="p-2 pt-0">
-                    <a
-                      href={whatsappItemUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-full py-1.5 px-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[11px] font-black flex items-center justify-center gap-1 transition-colors"
-                    >
-                      <MessageSquare className="w-3 h-3 text-emerald-700" />
-                      Buy on WhatsApp
-                    </a>
-                  </div>
-                </div>
+                <GlovoProductCard key={p.id} product={prodItem} />
               );
             })}
           </div>
