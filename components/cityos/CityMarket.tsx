@@ -363,58 +363,6 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
         <MerchantOnboardingBanner className="mt-2" />
       )}
 
-      {/* 3D. Official Brand Flagships Showcase (Jumia mlp-* model) */}
-      {!searchQuery.trim() && (
-        <section className="bg-gradient-to-br from-[#0c1f6d] via-[#091547] to-[#040b22] text-white p-5 sm:p-6 rounded-3xl border border-blue-900/50 shadow-xl relative overflow-hidden group">
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-blue-500/20 blur-2xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="flex items-start sm:items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-white p-2.5 shadow-lg flex items-center justify-center shrink-0 ring-2 ring-white/20">
-                <img
-                  src="/images/brands/unilever/logo.svg"
-                  alt="Unilever Official Store"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-400/30">
-                    ★ Official Brand Flagship
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Direct Manufacturer Supply
-                  </span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-black text-white">
-                  Unilever Official Store
-                </h3>
-                <p className="text-xs text-slate-300 font-medium max-w-xl">
-                  Shop authentic Knorr, Vaseline, Closeup, Rexona, Pepsodent, Royco & Pears direct from Unilever Nigeria. Same-day delivery in Calabar.
-                </p>
-                <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-300 flex-wrap">
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🍲 Knorr</span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🧴 Vaseline</span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🪥 Closeup</span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🌬️ Rexona</span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🦷 Pepsodent</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <Link
-                href="/brand/unilever"
-                className="px-5 py-3 rounded-2xl bg-white text-blue-950 hover:bg-slate-100 text-xs font-black shadow-lg transition-all flex items-center gap-2 group-hover:scale-102"
-              >
-                <span>Enter Brand Store</span>
-                <ArrowRight className="w-4 h-4 text-blue-900" />
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Product Categories */}
       <section className="space-y-3">
         {/* Product Categories / Aisles */}
@@ -648,6 +596,58 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
           </div>
         )}
       </section>
+
+      {/* 4. Official Brand Flagships Showcase (Unilever Official Store) */}
+      {!searchQuery.trim() && (
+        <section className="bg-gradient-to-br from-[#0c1f6d] via-[#091547] to-[#040b22] text-white p-5 sm:p-6 rounded-3xl border border-blue-900/50 shadow-xl relative overflow-hidden group mt-6">
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-blue-500/20 blur-2xl pointer-events-none" />
+          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+            <div className="flex items-start sm:items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-white p-2.5 shadow-lg flex items-center justify-center shrink-0 ring-2 ring-white/20">
+                <img
+                  src="/images/brands/unilever/logo.svg"
+                  alt="Unilever Official Store"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-400/30">
+                    ★ Official Brand Flagship
+                  </span>
+                  <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    Direct Manufacturer Supply
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-white">
+                  Unilever Official Store
+                </h3>
+                <p className="text-xs text-slate-300 font-medium max-w-xl">
+                  Shop authentic Knorr, Vaseline, Closeup, Rexona, Pepsodent, Royco & Pears direct from Unilever Nigeria. Same-day delivery in Calabar.
+                </p>
+                <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-300 flex-wrap">
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🍲 Knorr</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🧴 Vaseline</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🪥 Closeup</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🌬️ Rexona</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🦷 Pepsodent</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 shrink-0">
+              <Link
+                href="/brand/unilever"
+                className="px-5 py-3 rounded-2xl bg-white text-blue-950 hover:bg-slate-100 text-xs font-black shadow-lg transition-all flex items-center gap-2 group-hover:scale-102"
+              >
+                <span>Enter Brand Store</span>
+                <ArrowRight className="w-4 h-4 text-blue-900" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* 4.5. On-Demand Product Sourcing Banner */}
       <ProductSourcingBanner
