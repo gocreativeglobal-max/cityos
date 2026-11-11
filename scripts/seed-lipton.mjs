@@ -67,9 +67,9 @@ async function main() {
              "categoryId" = $3,
              "globalCategory" = 'Groceries & Supermarket',
              description = $4,
-             price = 1100,
+             price = 1155,
              cost = 1100,
-             "compareAtPrice" = 1350,
+             "compareAtPrice" = 1418,
              "stockQuantity" = 100,
              unit = 'pack',
              "imageAssetId" = $5,
@@ -82,7 +82,7 @@ async function main() {
       productId = crypto.randomUUID();
       await client.query(
         `INSERT INTO "retailProduct" (id, "organizationId", "categoryId", "globalCategory", name, "variantName", description, price, cost, "compareAtPrice", "stockQuantity", unit, "imageAssetId", "isWeighed")
-         VALUES ($1, $2, $3, 'Groceries & Supermarket', $4, '25 Tea Bags', $5, 1100, 1100, 1350, 100, 'pack', $6, false)`,
+         VALUES ($1, $2, $3, 'Groceries & Supermarket', $4, '25 Tea Bags', $5, 1155, 1100, 1418, 100, 'pack', $6, false)`,
         [productId, orgId, categoryId, productName, productDesc, JSON.stringify(images)]
       );
       console.log('✓ Created Product:', productName);

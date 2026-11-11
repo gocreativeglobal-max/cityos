@@ -180,9 +180,9 @@ export default function ChowdeckDeliveryHeader({
         </div>
       )}
 
-      {/* Search Bar with contextual on-focus suggestions */}
-      <div className="relative">
-        <div className="relative flex items-center">
+      {/* Search Bar with contextual on-focus suggestions (Sticky) */}
+      <div className="sticky top-0 z-30 bg-[#F6F7F8]/95 backdrop-blur-md py-2.5 -my-1 transition-all">
+        <div className="relative flex items-center shadow-2xs rounded-2xl">
           <Search className="w-5 h-5 absolute left-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
@@ -194,7 +194,7 @@ export default function ChowdeckDeliveryHeader({
               setTimeout(() => setIsSearchFocused(false), 200);
             }}
             placeholder={placeholder}
-            className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white border border-slate-200/90 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 shadow-2xs transition-all"
+            className="w-full pl-12 pr-10 py-3.5 rounded-2xl bg-white border border-slate-200/90 text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 shadow-2xs hover:border-slate-300 transition-all"
           />
           {searchQuery && (
             <button

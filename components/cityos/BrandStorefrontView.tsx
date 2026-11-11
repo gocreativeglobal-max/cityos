@@ -495,8 +495,8 @@ export default function BrandStorefrontView({
 
       {/* 6. Main Filterable & Searchable Catalog */}
       <section id="brand-catalog-anchor" className="space-y-4 pt-2">
-        {/* Search & Sort Controls Bar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm space-y-3">
+        {/* Search & Sort Controls Bar (Sticky) */}
+        <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-md p-4 rounded-2xl border border-slate-200/80 shadow-sm space-y-3">
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Search Input */}
             <div className="relative flex-1">
