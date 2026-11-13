@@ -45,7 +45,18 @@ const UNILEVER_SUB_BRANDS: SubBrandItem[] = [
   { id: 'pears', name: 'Pears', icon: '👶', logo: '/images/brands/unilever/subbrands/pears.png', tag: 'Pears', description: 'Gentle dermatological baby lotion & oils' },
 ];
 
-const CAMPAIGN_SLIDES = [
+const INFINIX_SUB_BRANDS: SubBrandItem[] = [
+  { id: 'all', name: 'All Series', icon: '✨', tag: 'all', description: 'Complete official Infinix smartphone & gadget ecosystem' },
+  { id: 'gt-series', name: 'GT Gaming', icon: '🎮', logo: '/images/products/infinix/gt-50-pro-512gb.jpg', tag: 'GT Gaming Series', description: 'Ultra gaming flagships with 144Hz & Dimensity' },
+  { id: 'zero-series', name: 'Zero Series', icon: '🌟', logo: '/images/products/infinix/zero-flip-512gb.jpg', tag: 'Zero Series', description: 'Zero Flip foldable & 4K vlog photography' },
+  { id: 'note-series', name: 'Note Series', icon: '⚡', logo: '/images/products/infinix/note-edge-256gb.jpg', tag: 'Note Series', description: 'Curved AMOLED, 108MP camera & FastCharge' },
+  { id: 'hot-series', name: 'Hot Series', icon: '🔥', logo: '/images/products/infinix/hot-70-pro-5g-128gb.jpg', tag: 'Hot Series', description: 'Helio G100 gaming, 120Hz displays & 7000mAh' },
+  { id: 'smart-series', name: 'Smart Series', icon: '📱', logo: '/images/products/infinix/smart-20-128gb.jpg', tag: 'Smart Series', description: 'Value champions with big batteries & Dynamic Bar' },
+  { id: 'wearables-audio', name: 'Wearables & Audio', icon: '🎧', logo: '/images/products/infinix/xwatch-n4-pro.jpg', tag: 'Wearables & Audio', description: 'AMOLED smartwatches & ANC wireless earbuds' },
+  { id: 'power-accessories', name: 'Power & Tech', icon: '🔋', logo: '/images/products/infinix/powerbank-30000mah.jpg', tag: 'Power & Accessories', description: 'High-density fast power banks & accessories' },
+];
+
+const UNILEVER_CAMPAIGN_SLIDES = [
   {
     id: 'hero',
     title: 'Unilever Official Flagship Store',
@@ -72,6 +83,33 @@ const CAMPAIGN_SLIDES = [
   },
 ];
 
+const INFINIX_CAMPAIGN_SLIDES = [
+  {
+    id: 'hero',
+    title: 'Infinix Official Flagship Store',
+    tagline: '100% Genuine Guaranteed + Official Carlcare Warranty in Calabar',
+    badge: 'Carlcare Authorized Hub',
+    image: '/images/brands/infinix/hero-banner.jpg',
+    targetBrand: 'all',
+  },
+  {
+    id: 'hot70',
+    title: 'Infinix Hot 70 Series',
+    tagline: 'Ultra Fast Helio G100 Gaming, 120Hz Displays & Long-Lasting Battery',
+    badge: 'New Flagship Arrival',
+    image: '/images/brands/infinix/hot70-banner.jpg',
+    targetBrand: 'Hot Series',
+  },
+  {
+    id: 'smart20',
+    title: 'Infinix Smart 20 Series',
+    tagline: 'Everyday Champion with 120Hz Display, Dynamic Bar & 5200mAh Power',
+    badge: 'Smart Value Pick',
+    image: '/images/brands/infinix/smart20-banner.png',
+    targetBrand: 'Smart Series',
+  },
+];
+
 export interface BrandStorefrontViewProps {
   org: any;
   products: any[];
@@ -84,6 +122,18 @@ export default function BrandStorefrontView({
   initialSubBrand = 'all',
 }: BrandStorefrontViewProps) {
   const { fmt } = useMoney();
+  const isInfinix =
+    org?.id === 'infinix-store' ||
+    /infinix/i.test(org?.name || '') ||
+    org?.metadata?.brandName === 'Infinix';
+
+  const brandName = org?.name || (isInfinix ? 'Infinix Official Store' : 'Unilever Official Store');
+  const brandShortName = isInfinix ? 'Infinix' : 'Unilever';
+  const brandLogo = org?.logoAssetId || (isInfinix ? '/images/brands/infinix/logo.jpg' : '/images/brands/unilever/logo.svg');
+  const subBrandsList = isInfinix ? INFINIX_SUB_BRANDS : UNILEVER_SUB_BRANDS;
+  const campaignSlides = isInfinix ? INFINIX_CAMPAIGN_SLIDES : UNILEVER_CAMPAIGN_SLIDES;
+  const defaultOrgId = org?.id || (isInfinix ? 'infinix-store' : 'unilever-store');
+
   const [activeSubBrand, setActiveSubBrand] = useState<string>(initialSubBrand);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -99,11 +149,12 @@ export default function BrandStorefrontView({
 
   // Auto-rotate hero slider
   useEffect(() => {
+    if (campaignSlides.length <= 1) return;
     const timer = setInterval(() => {
-      setActiveSlideIdx((prev) => (prev + 1) % CAMPAIGN_SLIDES.length);
+      setActiveSlideIdx((prev) => (prev + 1) % campaignSlides.length);
     }, 6000);
     return () => clearInterval(timer);
-  }, []);
+  }, [campaignSlides.length]);
 
   // Sync initialSubBrand prop changes
   useEffect(() => {
@@ -125,11 +176,21 @@ export default function BrandStorefrontView({
   // Filter products
   const filteredProducts = useMemo(() => {
     let list = products.filter((p) => {
-      // Sub-brand filter
+      // Sub-brand / Series filter
       if (activeSubBrand && activeSubBrand !== 'all') {
-        const brandMatch = (p.brand || '').toLowerCase().includes(activeSubBrand.toLowerCase());
-        const nameMatch = (p.name || '').toLowerCase().includes(activeSubBrand.toLowerCase());
-        if (!brandMatch && !nameMatch) return false;
+        const q = activeSubBrand.toLowerCase();
+        const brandMatch = (p.brand || '').toLowerCase().includes(q);
+        const nameMatch = (p.name || '').toLowerCase().includes(q);
+        const catMatch =
+          (p.categoryName || '').toLowerCase().includes(q) ||
+          (p.globalCategory || '').toLowerCase().includes(q);
+        const tagWords = q.split(/\s+/).filter((w) => w.length > 2 && w !== 'series');
+        const wordMatch = tagWords.some(
+          (w) =>
+            (p.name || '').toLowerCase().includes(w) ||
+            (p.categoryName || '').toLowerCase().includes(w)
+        );
+        if (!brandMatch && !nameMatch && !catMatch && !wordMatch) return false;
       }
 
       // Category filter
@@ -172,16 +233,19 @@ export default function BrandStorefrontView({
     return list;
   }, [products, activeSubBrand, activeCategory, inStockOnly, searchQuery, sortBy]);
 
-  // Extract top deals (discount >= 20% or multi-packs)
+  // Extract top deals (discount >= 20% or multi-packs / pro editions)
   const topDeals = useMemo(() => {
     return products
       .filter((p) => {
-        const hasDiscount = p.compareAtPrice && p.compareAtPrice > p.price && (p.compareAtPrice - p.price) / p.compareAtPrice >= 0.2;
-        const isBundle = /pack|combo|triple|twin|8/i.test(p.name);
+        const hasDiscount =
+          p.compareAtPrice &&
+          p.compareAtPrice > p.price &&
+          (p.compareAtPrice - p.price) / p.compareAtPrice >= (isInfinix ? 0.05 : 0.2);
+        const isBundle = /pack|combo|triple|twin|8|pro/i.test(p.name);
         return hasDiscount || isBundle;
       })
       .slice(0, 8);
-  }, [products]);
+  }, [products, isInfinix]);
 
   const handleSubBrandSelect = (tag: string) => {
     setActiveSubBrand(tag);
@@ -196,8 +260,8 @@ export default function BrandStorefrontView({
     try {
       if (navigator.share) {
         await navigator.share({
-          title: 'Unilever Official Store - Calabar 9jaLive',
-          text: 'Shop 100% genuine Unilever products in Calabar with fast doorstep delivery!',
+          title: `${brandName} - Calabar 9jaLive`,
+          text: `Shop 100% genuine guaranteed ${brandShortName} products in Calabar with fast doorstep delivery!`,
           url: window.location.href,
         });
       } else {
@@ -208,23 +272,40 @@ export default function BrandStorefrontView({
     } catch {}
   };
 
-  const activeSlide = CAMPAIGN_SLIDES[activeSlideIdx];
+  const activeSlide = campaignSlides[activeSlideIdx % campaignSlides.length] || campaignSlides[0];
 
   return (
     <div className="space-y-6 pb-28 animate-in fade-in duration-300">
       {/* 1. Official Brand Flagship Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0c1f6d] via-[#091547] to-[#03091e] text-white p-6 sm:p-8 md:p-10 border border-blue-900/40 shadow-2xl">
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-3xl text-white p-6 sm:p-8 md:p-10 border shadow-2xl transition-colors',
+          isInfinix
+            ? 'bg-gradient-to-br from-[#071f1a] via-[#06181b] to-[#020b0c] border-emerald-900/40'
+            : 'bg-gradient-to-br from-[#0c1f6d] via-[#091547] to-[#03091e] border-blue-900/40'
+        )}
+      >
         {/* Subtle decorative glow */}
-        <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+        <div
+          className={cn(
+            'absolute -top-24 -right-24 w-96 h-96 rounded-full blur-3xl pointer-events-none',
+            isInfinix ? 'bg-emerald-500/15' : 'bg-blue-500/15'
+          )}
+        />
+        <div
+          className={cn(
+            'absolute -bottom-24 -left-24 w-80 h-80 rounded-full blur-3xl pointer-events-none',
+            isInfinix ? 'bg-teal-500/15' : 'bg-teal-500/10'
+          )}
+        />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-            {/* Unilever Official Logo Badge */}
+            {/* Official Logo Badge */}
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white p-3 shadow-xl ring-4 ring-white/20 flex items-center justify-center shrink-0">
               <img
-                src="/images/brands/unilever/logo.svg"
-                alt="Unilever Official Mark"
+                src={brandLogo}
+                alt={`${brandName} Official Mark`}
                 className="w-full h-full object-contain"
               />
               <div className="absolute -bottom-2 -right-2 w-7 h-7 rounded-full bg-amber-400 text-slate-950 flex items-center justify-center shadow-md font-black text-xs ring-2 ring-slate-900" title="Official Gold Flagship">
@@ -240,21 +321,21 @@ export default function BrandStorefrontView({
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
                   <PackageCheck className="w-3.5 h-3.5" />
-                  Direct Manufacturer Supply
+                  {isInfinix ? 'Carlcare 12+1 Mo. Warranty' : 'Direct Manufacturer Supply'}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 text-white text-xs font-medium backdrop-blur-sm">
-                  Calabar Depot
+                  {isInfinix ? 'Marian Hub · Calabar' : 'Calabar Depot'}
                 </span>
               </div>
 
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white">
-                Unilever Official Store
+                {brandName}
               </h1>
 
               <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 font-medium">
                 <span className="text-emerald-400 font-semibold flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  Depot Open · Dispatches in 2 Hours
+                  {isInfinix ? 'Carlcare Hub Open · Official Warranty Service' : 'Depot Open · Dispatches in 2 Hours'}
                 </span>
               </div>
             </div>
@@ -278,7 +359,7 @@ export default function BrandStorefrontView({
 
             <a
               href={`https://wa.me/${whatsappClean}?text=${encodeURIComponent(
-                'Hello Unilever Official Store Desk, I am reaching out via Calabar 9jaLive to make an enquiry or place an order.'
+                `Hello ${brandName} Desk, I am reaching out via Calabar 9jaLive to make an enquiry or place an order.`
               )}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -345,20 +426,22 @@ export default function BrandStorefrontView({
         </div>
 
         {/* Slider Navigation Dots */}
-        <div className="absolute bottom-3 right-4 flex items-center gap-1.5 z-20">
-          {CAMPAIGN_SLIDES.map((slide, idx) => (
-            <button
-              key={slide.id}
-              type="button"
-              onClick={() => setActiveSlideIdx(idx)}
-              className={cn(
-                'h-2 rounded-full transition-all',
-                activeSlideIdx === idx ? 'w-6 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
-              )}
-              aria-label={`Slide ${idx + 1}`}
-            />
-          ))}
-        </div>
+        {campaignSlides.length > 1 && (
+          <div className="absolute bottom-3 right-4 flex items-center gap-1.5 z-20">
+            {campaignSlides.map((slide, idx) => (
+              <button
+                key={slide.id}
+                type="button"
+                onClick={() => setActiveSlideIdx(idx)}
+                className={cn(
+                  'h-2 rounded-full transition-all',
+                  activeSlideIdx === idx ? 'w-6 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
+                )}
+                aria-label={`Slide ${idx + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* 3. Sub-Brand Interactive Filter Rail (Jumia mlp exact pattern) */}
@@ -367,10 +450,12 @@ export default function BrandStorefrontView({
           <div>
             <h3 className="text-sm md:text-base font-black text-slate-900 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-blue-600" />
-              Explore Unilever Sub-Brands
+              {isInfinix ? 'Explore Infinix Series & Ecosystem' : 'Explore Unilever Sub-Brands'}
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              Click a brand to browse its official authentic catalog
+              {isInfinix
+                ? 'Click a series to browse smartphones, smartwatches, audio & power gear'
+                : 'Click a brand to browse its official authentic catalog'}
             </p>
           </div>
           {activeSubBrand !== 'all' && (
@@ -379,14 +464,25 @@ export default function BrandStorefrontView({
               onClick={() => setActiveSubBrand('all')}
               className="text-xs font-bold text-blue-600 hover:text-blue-800 underline"
             >
-              View All Brands ({products.length})
+              View All {isInfinix ? 'Series' : 'Brands'} ({products.length})
             </button>
           )}
         </div>
 
         <div className="grid grid-cols-4 sm:grid-cols-8 gap-3 pt-2">
-          {UNILEVER_SUB_BRANDS.map((sb) => {
+          {subBrandsList.map((sb) => {
             const isSelected = activeSubBrand.toLowerCase() === sb.tag.toLowerCase();
+            const itemCount = sb.tag === 'all'
+              ? products.length
+              : products.filter((p) => {
+                  const q = sb.tag.toLowerCase();
+                  return (
+                    (p.brand || '').toLowerCase().includes(q) ||
+                    (p.name || '').toLowerCase().includes(q) ||
+                    (p.categoryName || '').toLowerCase().includes(q)
+                  );
+                }).length;
+
             return (
               <button
                 key={sb.id}
@@ -425,9 +521,7 @@ export default function BrandStorefrontView({
                     {sb.name}
                   </span>
                   <span className="text-[10px] text-slate-400 font-medium block">
-                    {sb.tag === 'all'
-                      ? `${products.length} items`
-                      : `${products.filter((p) => (p.brand || '').toLowerCase().includes(sb.tag.toLowerCase()) || (p.name || '').toLowerCase().includes(sb.tag.toLowerCase())).length} items`}
+                    {itemCount} items
                   </span>
                 </div>
               </button>
@@ -446,15 +540,17 @@ export default function BrandStorefrontView({
               </span>
               <div>
                 <h3 className="text-sm md:text-base font-black text-slate-900">
-                  Unilever Mega Deals & Multi-Packs
+                  {isInfinix ? 'Infinix Official Deals & Flagship Offers' : 'Unilever Mega Deals & Multi-Packs'}
                 </h3>
                 <p className="text-xs text-slate-600 font-medium">
-                  Direct manufacturer bulk bundles at maximum discount
+                  {isInfinix
+                    ? 'Authentic smartphones and gadgets with official manufacturer discounts'
+                    : 'Direct manufacturer bulk bundles at maximum discount'}
                 </p>
               </div>
             </div>
             <span className="text-xs font-bold text-amber-800 bg-amber-100/80 px-2.5 py-1 rounded-full border border-amber-300">
-              Up to 35% Off
+              {isInfinix ? 'Official Carlcare Hub' : 'Up to 35% Off'}
             </span>
           </div>
 
@@ -462,7 +558,7 @@ export default function BrandStorefrontView({
             {topDeals.map((deal) => {
               const discount = deal.compareAtPrice && deal.compareAtPrice > deal.price
                 ? Math.round(((deal.compareAtPrice - deal.price) / deal.compareAtPrice) * 100)
-                : 25;
+                : (isInfinix ? 8 : 25);
               const prodItem: GlovoProductItem = {
                 id: deal.id,
                 name: deal.name,
@@ -471,9 +567,9 @@ export default function BrandStorefrontView({
                 description: deal.description,
                 imageAssetId: deal.imageAssetId,
                 imageUrl: deal.imageAssetId,
-                storeName: org?.name || 'Unilever Official Store',
-                organizationId: org?.id || 'unilever-store',
-                brand: deal.brand || 'Unilever',
+                storeName: brandName,
+                organizationId: defaultOrgId,
+                brand: deal.brand || brandShortName,
                 globalCategory: deal.globalCategory,
                 stockQuantity: 100,
               };
@@ -505,7 +601,11 @@ export default function BrandStorefrontView({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={`Search across ${products.length} Unilever products (e.g. Knorr beef, Vaseline 400ml, Closeup red hot)...`}
+                placeholder={
+                  isInfinix
+                    ? `Search across ${products.length} Infinix devices (e.g. Hot 70, GT 50, Note Edge, XWatch, Earbuds)...`
+                    : `Search across ${products.length} Unilever products (e.g. Knorr beef, Vaseline 400ml, Closeup red hot)...`
+                }
                 className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs font-medium text-slate-900 bg-slate-50/50"
               />
               {searchQuery && (
@@ -570,7 +670,7 @@ export default function BrandStorefrontView({
         {/* Results Header */}
         <div className="flex items-center justify-between px-1 text-xs">
           <p className="font-bold text-slate-600">
-            Showing <span className="text-slate-900 font-black">{filteredProducts.length}</span> of {products.length} Unilever products
+            Showing <span className="text-slate-900 font-black">{filteredProducts.length}</span> of {products.length} {brandShortName} {isInfinix ? 'devices' : 'products'}
             {activeSubBrand !== 'all' && (
               <span className="ml-1.5 px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-black">
                 {activeSubBrand}
@@ -606,9 +706,9 @@ export default function BrandStorefrontView({
                 description: p.description,
                 imageAssetId: p.imageAssetId,
                 imageUrl: p.imageAssetId,
-                storeName: org?.name || 'Unilever Official Store',
-                organizationId: org?.id || 'unilever-store',
-                brand: p.brand || 'Unilever',
+                storeName: brandName,
+                organizationId: defaultOrgId,
+                brand: p.brand || brandShortName,
                 globalCategory: p.globalCategory || p.categoryName,
                 stockQuantity: typeof p.stockQuantity === 'number' ? p.stockQuantity : 100,
               };
@@ -621,9 +721,11 @@ export default function BrandStorefrontView({
         ) : (
           <div className="text-center py-16 bg-white rounded-3xl border border-slate-100 p-8 space-y-3">
             <span className="text-4xl">🔍</span>
-            <h4 className="text-base font-black text-slate-900">No matching Unilever products found</h4>
+            <h4 className="text-base font-black text-slate-900">
+              No matching {brandShortName} {isInfinix ? 'devices' : 'products'} found
+            </h4>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Try adjusting your search query or switching to &ldquo;All Brands&rdquo; to see the full factory catalog.
+              Try adjusting your search query or switching to &ldquo;{isInfinix ? 'All Series' : 'All Brands'}&rdquo; to see the full catalog.
             </p>
             <button
               type="button"

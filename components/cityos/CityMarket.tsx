@@ -597,56 +597,127 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
         )}
       </section>
 
-      {/* 4. Official Brand Flagships Showcase (Unilever Official Store) */}
+      {/* 4. Official Brand Flagships Showcase */}
       {!searchQuery.trim() && (
-        <section className="bg-gradient-to-br from-[#0c1f6d] via-[#091547] to-[#040b22] text-white p-5 sm:p-6 rounded-3xl border border-blue-900/50 shadow-xl relative overflow-hidden group mt-6">
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-blue-500/20 blur-2xl pointer-events-none" />
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-            <div className="flex items-start sm:items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-white p-2.5 shadow-lg flex items-center justify-center shrink-0 ring-2 ring-white/20">
-                <img
-                  src="/images/brands/unilever/logo.svg"
-                  alt="Unilever Official Store"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-400/30">
-                    ★ Official Brand Flagship
-                  </span>
-                  <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    Direct Manufacturer Supply
-                  </span>
+        <div className="space-y-4 mt-6">
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-amber-400" />
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+                Official Brand Flagships
+              </h3>
+            </div>
+            <span className="text-[11px] font-bold text-slate-500">
+              100% Authentic · Direct Manufacturer Supply
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Unilever Official Store */}
+            <div className="bg-gradient-to-br from-[#0c1f6d] via-[#091547] to-[#040b22] text-white p-5 sm:p-6 rounded-3xl border border-blue-900/50 shadow-xl relative overflow-hidden group flex flex-col justify-between">
+              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-blue-500/20 blur-2xl pointer-events-none" />
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white p-2.5 shadow-lg flex items-center justify-center shrink-0 ring-2 ring-white/20">
+                    <img
+                      src="/images/brands/unilever/logo.svg"
+                      alt="Unilever Official Store"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-400/30">
+                        ★ Official Brand Flagship
+                      </span>
+                      <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Direct Manufacturer
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-black text-white">
+                      Unilever Official Store
+                    </h3>
+                  </div>
                 </div>
-                <h3 className="text-lg sm:text-xl font-black text-white">
-                  Unilever Official Store
-                </h3>
-                <p className="text-xs text-slate-300 font-medium max-w-xl">
-                  Shop authentic Knorr, Vaseline, Closeup, Rexona, Pepsodent, Royco & Pears direct from Unilever Nigeria. Same-day delivery in Calabar.
+
+                <p className="text-xs text-slate-300 font-medium line-clamp-2">
+                  Shop authentic Knorr, Vaseline, Closeup, Rexona, Pepsodent, Royco & Pears direct from Unilever Nigeria.
                 </p>
+
                 <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-300 flex-wrap">
                   <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🍲 Knorr</span>
                   <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🧴 Vaseline</span>
                   <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🪥 Closeup</span>
                   <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🌬️ Rexona</span>
-                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🦷 Pepsodent</span>
                 </div>
+              </div>
+
+              <div className="relative z-10 pt-5 flex items-center justify-between border-t border-white/10 mt-4">
+                <span className="text-[11px] text-slate-300 font-semibold">Calabar Central Depot</span>
+                <Link
+                  href="/brand/unilever"
+                  className="px-4 py-2.5 rounded-xl bg-white text-blue-950 hover:bg-slate-100 text-xs font-black shadow transition-all inline-flex items-center gap-1.5 group-hover:scale-102"
+                >
+                  <span>Enter Store</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-blue-900" />
+                </Link>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <Link
-                href="/brand/unilever"
-                className="px-5 py-3 rounded-2xl bg-white text-blue-950 hover:bg-slate-100 text-xs font-black shadow-lg transition-all flex items-center gap-2 group-hover:scale-102"
-              >
-                <span>Enter Brand Store</span>
-                <ArrowRight className="w-4 h-4 text-blue-900" />
-              </Link>
+            {/* Infinix Official Store */}
+            <div className="bg-gradient-to-br from-[#071f1a] via-[#06181b] to-[#020b0c] text-white p-5 sm:p-6 rounded-3xl border border-emerald-900/50 shadow-xl relative overflow-hidden group flex flex-col justify-between">
+              <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-emerald-500/20 blur-2xl pointer-events-none" />
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-white p-2.5 shadow-lg flex items-center justify-center shrink-0 ring-2 ring-white/20">
+                    <img
+                      src="/images/brands/infinix/logo.jpg"
+                      alt="Infinix Official Store"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-black uppercase tracking-wider border border-amber-400/30">
+                        ★ Official Brand Flagship
+                      </span>
+                      <span className="text-[11px] text-emerald-400 font-bold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        Carlcare 12+1 Mo. Warranty
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-black text-white">
+                      Infinix Official Store
+                    </h3>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-300 font-medium line-clamp-2">
+                  Official Infinix Flagship: GT Gaming, Zero Flip, Note Edge, Hot 70, Smart 20, AMOLED Smartwatches & TWS Audio.
+                </p>
+
+                <div className="flex items-center gap-1.5 pt-1 text-[11px] text-slate-300 flex-wrap">
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🎮 GT Gaming</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">⚡ Note Series</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">🔥 Hot 70</span>
+                  <span className="px-2 py-0.5 rounded-md bg-white/10 font-bold">⌚ XWatch</span>
+                </div>
+              </div>
+
+              <div className="relative z-10 pt-5 flex items-center justify-between border-t border-white/10 mt-4">
+                <span className="text-[11px] text-slate-300 font-semibold">Carlcare Marian Hub</span>
+                <Link
+                  href="/brand/infinix"
+                  className="px-4 py-2.5 rounded-xl bg-white text-emerald-950 hover:bg-slate-100 text-xs font-black shadow transition-all inline-flex items-center gap-1.5 group-hover:scale-102"
+                >
+                  <span>Enter Store</span>
+                  <ArrowRight className="w-3.5 h-3.5 text-emerald-900" />
+                </Link>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
       )}
 
       {/* 4.5. On-Demand Product Sourcing Banner */}

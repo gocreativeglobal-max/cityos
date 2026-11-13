@@ -365,6 +365,9 @@ export async function getResidentOrganization(rawIdentifier: string) {
   if (identifier.toLowerCase() === 'unilever') {
     identifier = 'unilever-store';
   }
+  if (identifier.toLowerCase() === 'infinix') {
+    identifier = 'infinix-store';
+  }
 
   let listing = await db.orm.public.DiscoveryListing.where({ slug: identifier }).first();
   if (!listing && identifier !== rawIdentifier) {

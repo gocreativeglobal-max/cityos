@@ -70,8 +70,12 @@ export default async function BrandStorePage({
     );
   }
 
-  // If this organization is flagged as an official brand store or is Unilever
-  if (org.id === 'unilever-store' || org.metadata?.isOfficialBrandStore) {
+  // If this organization is flagged as an official brand store, Unilever, or Infinix
+  if (
+    org.id === 'unilever-store' ||
+    org.id === 'infinix-store' ||
+    org.metadata?.isOfficialBrandStore
+  ) {
     return (
       <div className="max-w-5xl mx-auto">
         <BrandStorefrontView
