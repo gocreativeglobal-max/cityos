@@ -406,9 +406,9 @@ async function main() {
         );
       }
 
-      // Selling Price = Math.round(cost * 1.05)
-      const sellingPrice = Math.round(p.cost * 1.05);
-      const compareAt = p.compareAtPrice ? Math.round(p.compareAtPrice * 1.05) : null;
+      // Selling Price with +5% markup applied
+      const sellingPrice = Math.round(p.cost * 1.05 * 1.05);
+      const compareAt = p.compareAtPrice ? Math.round(p.compareAtPrice * 1.05 * 1.05) : null;
       const imagePath = `/images/products/infinix/${p.file}`;
 
       let prodCheck = await client.query(
