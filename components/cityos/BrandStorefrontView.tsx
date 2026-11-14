@@ -24,6 +24,7 @@ import { useMoney } from '@/components/cityos/CityProvider';
 import GlovoProductCard, { GlovoProductItem } from '@/components/cityos/delivery/GlovoProductCard';
 import ChowdeckBasketDock from '@/components/cityos/delivery/ChowdeckBasketDock';
 import { FallbackImg } from '@/components/cityos/CityUI';
+import PriceFilterPopover, { PriceRangeValue, getPriceFilterLabel } from '@/components/cityos/PriceFilterPopover';
 
 interface SubBrandItem {
   id: string;
@@ -138,6 +139,7 @@ export default function BrandStorefrontView({
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [inStockOnly, setInStockOnly] = useState<boolean>(false);
+  const [priceFilter, setPriceFilter] = useState<PriceRangeValue>({ preset: 'all' });
   const [sortBy, setSortBy] = useState<'featured' | 'price-asc' | 'price-desc' | 'discount'>('featured');
   const [activeSlideIdx, setActiveSlideIdx] = useState<number>(0);
   const [isFollowing, setIsFollowing] = useState<boolean>(false);
@@ -205,6 +207,11 @@ export default function BrandStorefrontView({
         if (qty <= 0) return false;
       }
 
+      // Price filter
+      const price = Number(p.price) || 0;
+      if (priceFilter.min !== undefined && price < priceFilter.min) return false;
+      if (priceFilter.max !== undefined && price > priceFilter.max) return false;
+
       // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
@@ -231,7 +238,9 @@ export default function BrandStorefrontView({
     }
 
     return list;
-  }, [products, activeSubBrand, activeCategory, inStockOnly, searchQuery, sortBy]);
+  }, [products, activeSubBrand, activeCategory, inStockOnly, priceFilter, searchQuery, sortBy]);
+
+  const hasPriceFilter = priceFilter.preset !== 'all' && (priceFilter.preset !== 'custom' || priceFilter.min !== undefined || priceFilter.max !== undefined);
 
   // Extract top deals (discount >= 20% or multi-packs / pro editions)
   const topDeals = useMemo(() => {
@@ -619,12 +628,18 @@ export default function BrandStorefrontView({
               )}
             </div>
 
-            {/* Sort Dropdown */}
-            <div className="flex items-center gap-2">
+            {/* Sort & Price Filter Controls */}
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <PriceFilterPopover
+                value={priceFilter}
+                onChange={setPriceFilter}
+                theme={isInfinix ? 'emerald' : 'blue'}
+              />
+
               <select
                 value={sortBy}
                 onChange={(e: any) => setSortBy(e.target.value)}
-                className="px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-800 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
               >
                 <option value="featured">Featured / Best Match</option>
                 <option value="price-asc">Price: Low to High</option>
@@ -636,7 +651,7 @@ export default function BrandStorefrontView({
                 type="button"
                 onClick={() => setInStockOnly(!inStockOnly)}
                 className={cn(
-                  'px-3 py-2.5 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap',
+                  'px-3 py-2.5 rounded-xl border text-xs font-bold transition-colors whitespace-nowrap shadow-2xs',
                   inStockOnly
                     ? 'bg-blue-50 border-blue-300 text-blue-700'
                     : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
@@ -669,16 +684,31 @@ export default function BrandStorefrontView({
 
         {/* Results Header */}
         <div className="flex items-center justify-between px-1 text-xs">
-          <p className="font-bold text-slate-600">
-            Showing <span className="text-slate-900 font-black">{filteredProducts.length}</span> of {products.length} {brandShortName} {isInfinix ? 'devices' : 'products'}
+          <p className="font-bold text-slate-600 flex items-center gap-1.5 flex-wrap">
+            <span>
+              Showing <span className="text-slate-900 font-black">{filteredProducts.length}</span> of {products.length} {brandShortName} {isInfinix ? 'devices' : 'products'}
+            </span>
             {activeSubBrand !== 'all' && (
-              <span className="ml-1.5 px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-black">
+              <span className="px-2 py-0.5 rounded-md bg-blue-100 text-blue-800 font-black">
                 {activeSubBrand}
+              </span>
+            )}
+            {hasPriceFilter && (
+              <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-black inline-flex items-center gap-1 shadow-2xs">
+                <span>{getPriceFilterLabel(priceFilter)}</span>
+                <button
+                  type="button"
+                  onClick={() => setPriceFilter({ preset: 'all' })}
+                  className="hover:text-emerald-950 ml-0.5"
+                  title="Remove price filter"
+                >
+                  <X className="w-3 h-3" />
+                </button>
               </span>
             )}
           </p>
 
-          {(activeSubBrand !== 'all' || activeCategory !== 'all' || searchQuery.trim() || inStockOnly) && (
+          {(activeSubBrand !== 'all' || activeCategory !== 'all' || searchQuery.trim() || inStockOnly || hasPriceFilter) && (
             <button
               type="button"
               onClick={() => {
@@ -686,6 +716,7 @@ export default function BrandStorefrontView({
                 setActiveCategory('all');
                 setSearchQuery('');
                 setInStockOnly(false);
+                setPriceFilter({ preset: 'all' });
               }}
               className="font-bold text-rose-600 hover:text-rose-700 hover:underline"
             >

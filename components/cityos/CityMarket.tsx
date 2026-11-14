@@ -14,6 +14,7 @@ import {
   LayoutGrid,
   Layers,
   MessageSquare,
+  X,
 } from 'lucide-react';
 import { useCity } from '@/components/cityos/CityProvider';
 import { getCityMarketFeed } from '@/app/actions/commerce';
@@ -27,6 +28,7 @@ import MarketEssentialsDeals from '@/components/cityos/MarketEssentialsDeals';
 import RecentlyViewedSection from '@/components/cityos/RecentlyViewedSection';
 import MerchantOnboardingBanner from '@/components/cityos/MerchantOnboardingBanner';
 import ProductSourcingBanner from '@/components/cityos/ProductSourcingBanner';
+import PriceFilterPopover, { PriceRangeValue, getPriceFilterLabel } from '@/components/cityos/PriceFilterPopover';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/lib/utils';
 import { CANONICAL_ECOMMERCE_CATEGORIES } from '@/lib/taxonomy/retail-categorizer';
@@ -81,6 +83,7 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
   const [activeAisle, setActiveAisle] = useState('all');
   const [activeArea, setActiveArea] = useState('all');
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [priceFilter, setPriceFilter] = useState<PriceRangeValue>({ preset: 'all' });
   const [sortBy, setSortBy] = useState<'popular' | 'price-asc' | 'price-desc'>('popular');
   const [viewMode, setViewMode] = useState<'sections' | 'grid'>('sections');
   const searchParams = useSearchParams();
@@ -242,6 +245,11 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
         const hasStock = p.isWeighed || (typeof p.stockQuantity === 'number' ? p.stockQuantity > 0 : true);
         if (!hasStock) return false;
       }
+      // Price range filter
+      const price = Number(p.price) || 0;
+      if (priceFilter.min !== undefined && price < priceFilter.min) return false;
+      if (priceFilter.max !== undefined && price > priceFilter.max) return false;
+
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = p.name.toLowerCase().includes(q);
@@ -261,7 +269,7 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
     }
 
     return list;
-  }, [products, activeSector, activeAisle, activeArea, inStockOnly, searchQuery, sortBy]);
+  }, [products, activeSector, activeAisle, activeArea, inStockOnly, priceFilter, searchQuery, sortBy]);
 
   // Group filteredProducts into the 9 Canonical Category Sections when browsing "All Goods"
   const categorizedSections = useMemo(() => {
@@ -317,11 +325,16 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
   const showSectionedView =
     activeAisle === 'all' && !searchQuery.trim() && viewMode === 'sections' && categorizedSections.length > 1;
 
+  const hasPriceFilter =
+    priceFilter.preset !== 'all' &&
+    (priceFilter.preset !== 'custom' || priceFilter.min !== undefined || priceFilter.max !== undefined);
+
   const hasActiveFilters =
     activeSector !== 'all' ||
     activeAisle !== 'all' ||
     activeArea !== 'all' ||
     inStockOnly ||
+    hasPriceFilter ||
     Boolean(searchQuery.trim());
 
   return (
@@ -380,6 +393,7 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
                     setActiveAisle('all');
                     setActiveArea('all');
                     setInStockOnly(false);
+                    setPriceFilter({ preset: 'all' });
                     setSearchQuery('');
                   }}
                   className="text-xs font-bold text-orange-600 hover:text-orange-700"
@@ -451,6 +465,21 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
                 ? 'Explore products organized by category'
                 : 'Browse available products'}
             </p>
+            {hasPriceFilter && (
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold inline-flex items-center gap-1 shadow-2xs">
+                  <span>Price: {getPriceFilterLabel(priceFilter)}</span>
+                  <button
+                    type="button"
+                    onClick={() => setPriceFilter({ preset: 'all' })}
+                    className="hover:text-emerald-950 ml-0.5 p-0.5 rounded-full hover:bg-emerald-200/60 transition-colors"
+                    title="Remove price filter"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              </div>
+            )}
           </div>
 
           {/* View Mode, Stock & Sort Controls */}
@@ -485,6 +514,12 @@ export default function CityMarket({ initialFeed }: { initialFeed?: any }) {
                 </button>
               </div>
             )}
+
+            <PriceFilterPopover
+              value={priceFilter}
+              onChange={setPriceFilter}
+              theme="emerald"
+            />
 
             <button
               type="button"
