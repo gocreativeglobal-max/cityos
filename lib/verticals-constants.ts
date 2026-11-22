@@ -82,7 +82,7 @@ export const VERTICAL_DEFINITIONS: Record<VerticalId, VerticalDefinition> = {
 
 export const DEFAULT_VERTICALS_CONFIG: PlatformVerticalsConfig = {
   jobs: true,
-  houses: true,
+  houses: false,
   shops: true,
   food: true,
   services: true,

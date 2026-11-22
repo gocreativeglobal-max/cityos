@@ -16,8 +16,8 @@ test('HQ Verticals Master Switch & Governance Suite', async (t) => {
     assert.equal(Object.keys(DEFAULT_VERTICALS_CONFIG).length, 7, 'Should have exactly 7 defined verticals');
 
     for (const v of requiredVerticals) {
-      if (v === 'citypay') {
-        assert.equal(DEFAULT_VERTICALS_CONFIG[v], false, 'Vertical citypay should default to false');
+      if (v === 'citypay' || v === 'houses') {
+        assert.equal(DEFAULT_VERTICALS_CONFIG[v], false, `Vertical ${v} should default to false`);
       } else {
         assert.equal(DEFAULT_VERTICALS_CONFIG[v], true, `Vertical ${v} should be enabled by default`);
       }
