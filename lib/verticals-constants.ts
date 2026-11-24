@@ -82,7 +82,7 @@ export const VERTICAL_DEFINITIONS: Record<VerticalId, VerticalDefinition> = {
 
 export const DEFAULT_VERTICALS_CONFIG: PlatformVerticalsConfig = {
   jobs: true,
-  houses: false,
+  houses: true,
   shops: true,
   food: true,
   services: true,
@@ -95,14 +95,14 @@ export const DEFAULT_VERTICALS_CONFIG: PlatformVerticalsConfig = {
  * When enabled, the resident platform focuses exclusively on Shopping & E-Commerce,
  * while keeping all other verticals fully intact in the backend ready for staged rollout.
  */
-export const PILOT_SHOP_ONLY_MODE = false;
+export const PILOT_SHOP_ONLY_MODE = true;
 
 /**
  * Pilot Stage Flag: Business / Merchant Registration.
  * When disabled (false), creating a business page is disabled and paused across the app,
  * ready to be re-enabled later by flipping this flag to true.
  */
-export const BUSINESS_CREATION_ENABLED = true;
+export const BUSINESS_CREATION_ENABLED = false;
 
 export const PILOT_VERTICALS_CONFIG: PlatformVerticalsConfig = {
   jobs: false,
